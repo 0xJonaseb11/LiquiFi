@@ -350,18 +350,23 @@ contract LendingPool is
     }
 
     /// @inheritdoc ILendingPool
-    function getTotalBorrows() external view override returns (uint256) {
-        return totalBorrows;
+    function getTotalBorrows() public view override returns (uint256) {
+        uint256 elapsed = block.timestamp - lastAccrualTimestamp;
+        if (elapsed == 0 || totalBorrows == 0) return totalBorrows;
+
+        uint256 borrowRate = interestRateModel.getBorrowRate(totalDeposits, totalBorrows);
+        uint256 interestFactor = borrowRate * elapsed;
+        return totalBorrows + (totalBorrows * interestFactor) / PRECISION;
     }
 
     /// @inheritdoc ILendingPool
     function getUtilizationRate() external view override returns (uint256) {
-        return interestRateModel.getUtilization(totalDeposits, totalBorrows);
+        return interestRateModel.getUtilization(totalDeposits, getTotalBorrows());
     }
 
     /// @inheritdoc ILendingPool
     function getBorrowRate() external view override returns (uint256) {
-        return interestRateModel.getBorrowRate(totalDeposits, totalBorrows);
+        return interestRateModel.getBorrowRate(totalDeposits, getTotalBorrows());
     }
 
     /// @notice Get total number of borrowers (for off-chain scanning)

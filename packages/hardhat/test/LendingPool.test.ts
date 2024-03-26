@@ -178,8 +178,11 @@ describe("LiquiFi Lending Protocol", function () {
     });
 
     it("should repay debt fully", async function () {
-      await usdc.connect(borrower).approve(await lendingPool.getAddress(), 10_000_000000n);
-      await lendingPool.connect(borrower).repay(10_000_000000n);
+      // Approve and repay enough to cover principal + accrued interest
+      // The contract will cap the repayment to the actual debt amount
+      const repayAmount = 11_000_000000n;
+      await usdc.connect(borrower).approve(await lendingPool.getAddress(), repayAmount);
+      await lendingPool.connect(borrower).repay(repayAmount);
 
       const pos = await lendingPool.getPosition(borrowerAddr);
       expect(pos.debtAmount).to.equal(0);
