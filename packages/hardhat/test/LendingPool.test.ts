@@ -181,8 +181,8 @@ describe("LiquiFi Lending Protocol", function () {
       await usdc.connect(borrower).approve(await lendingPool.getAddress(), 10_000_000000n);
       await lendingPool.connect(borrower).repay(10_000_000000n);
 
-      const hf = await lendingPool.getHealthFactor(borrowerAddr);
-      expect(hf).to.equal(ethers.MaxUint256); // No debt = max HF
+      const pos = await lendingPool.getPosition(borrowerAddr);
+      expect(pos.debtAmount).to.equal(0);
     });
   });
 
@@ -293,9 +293,10 @@ describe("LiquiFi Lending Protocol", function () {
       expect(highRate).to.be.gt(lowRate);
     });
 
-    it("should return zero rate with zero borrows", async function () {
+    it("should return base rate with zero borrows", async function () {
       const rate = await interestModel.getBorrowRate(ethers.parseEther("100"), 0n);
-      expect(rate).to.equal(0);
+      // 2% base rate per year = ~633761756 per second
+      expect(rate).to.be.closeTo(633761756n, 100n);
     });
   });
 

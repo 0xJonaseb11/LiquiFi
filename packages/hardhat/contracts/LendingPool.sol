@@ -451,8 +451,6 @@ contract LendingPool is
             uint256 borrowRate = interestRateModel.getBorrowRate(totalDeposits, totalBorrows);
             // borrowIndex *= (1 + borrowRate * elapsed)
             uint256 interestFactor = borrowRate * elapsed;
-            uint256 interestAccrued = (totalBorrows * interestFactor) / PRECISION;
-            totalBorrows += interestAccrued;
             borrowIndex += (borrowIndex * interestFactor) / PRECISION;
         }
 
@@ -471,7 +469,13 @@ contract LendingPool is
         }
 
         // Scale debt by ratio of current index to user's stored index
+        uint256 oldDebt = pos.debtAmount;
         pos.debtAmount = (pos.debtAmount * borrowIndex) / userIndex;
+        
+        // Update totalBorrows with the actual interest applied to this user
+        // This keeps totalBorrows exactly in sync with the sum of all debtAmount
+        totalBorrows = totalBorrows + pos.debtAmount - oldDebt;
+        
         _userBorrowIndex[user] = borrowIndex;
     }
 
