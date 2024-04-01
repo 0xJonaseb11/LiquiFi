@@ -31,6 +31,7 @@ interface ILendingPool {
     event LTVUpdated(uint256 oldLtv, uint256 newLtv);
     event LiquidationParamsUpdated(uint256 closeFactor, uint256 liquidationIncentive);
     event OracleUpdated(address oldOracle, address newOracle);
+    event LiquidationThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
 
     // ──────────────────────────────────────────────
     //  User actions

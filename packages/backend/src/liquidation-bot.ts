@@ -13,6 +13,8 @@ const LENDING_POOL_ABI = [
   "function liquidate(address borrower, uint256 repayAmount)",
   "function closeFactor() view returns (uint256)",
   "function liquidationIncentive() view returns (uint256)",
+  "function ltv() view returns (uint256)",
+  "function oracle() view returns (address)",
   "function getTotalDeposits() view returns (uint256)",
   "function getTotalBorrows() view returns (uint256)",
   "function getUtilizationRate() view returns (uint256)",
@@ -22,6 +24,10 @@ const LENDING_POOL_ABI = [
   "event Borrow(address indexed user, uint256 amount)",
   "event Repay(address indexed user, uint256 amount)",
   "event Liquidation(address indexed liquidator, address indexed borrower, uint256 debtRepaid, uint256 collateralSeized)",
+];
+
+const ORACLE_ABI = [
+  "function getPrice(address) view returns (uint256)",
 ];
 
 const ERC20_ABI = [
@@ -271,26 +277,73 @@ export class LiquidationBot {
    */
   private async _executeLiquidation(pos: PositionData): Promise<void> {
     try {
-      // Get close factor from contract
-      const closeFactor = await this.lendingPool.closeFactor();
       const PRECISION = ethers.parseEther("1");
+      const targetHF = ethers.parseEther(this.targetHealthFactor.toString());
 
-      // Max repayable = debt * closeFactor (in normalized 18-dec format)
+      // 1. Fetch protocol parameters
+      const [closeFactor, incentive, ltvRatio, oracleAddr] = await Promise.all([
+        this.lendingPool.closeFactor(),
+        this.lendingPool.liquidationIncentive(),
+        this.lendingPool.ltv(),
+        this.lendingPool.oracle(),
+      ]);
+
+      const oracle = new ethers.Contract(oracleAddr, ORACLE_ABI, this.provider);
+      const [collateralPrice, debtPrice] = await Promise.all([
+        oracle.getPrice(config.contracts.weth),
+        oracle.getPrice(config.contracts.usdc),
+      ]);
+
+      // 2. Calculate current values in USD (18 decimals)
+      // adjustedCollateral = (collateral * price * LTV) / 1e18
+      const collateralValueUSD = (pos.collateralAmount * collateralPrice) / 10n**8n;
+      const adjustedCollateral = (collateralValueUSD * ltvRatio) / PRECISION;
+      
+      const debtValueUSD = (pos.debtAmount * debtPrice) / 10n**8n;
+
+      /**
+       * 3. Calculate Optimal Repay Amount
+       * 
+       * deltaD = (TargetHF * DebtUSD - AdjustedCollateral) / (TargetHF - (1 + incentive) * LTV)
+       * 
+       * Note: We want to repay JUST enough to reach TargetHF.
+       */
+      const numerator = (targetHF * debtValueUSD / PRECISION) - adjustedCollateral;
+      const denominator = targetHF - ((PRECISION + incentive) * ltvRatio / PRECISION);
+      
+      let optimalRepayUSD = (numerator * PRECISION) / denominator;
+      
+      // Convert USD back to normalized debt amount (18 dec)
+      let optimalRepay18 = (optimalRepayUSD * 10n**8n) / debtPrice;
+
+      // 4. Enforce close factor limit
       const maxRepay18 = (pos.debtAmount * closeFactor) / PRECISION;
+      if (optimalRepay18 > maxRepay18) {
+        optimalRepay18 = maxRepay18;
+      }
 
-      // Convert from 18 decimals (internal) to 6 decimals (USDC)
-      const maxRepayUSDC = maxRepay18 / 10n ** 12n;
-
-      // Check our USDC balance
-      const ourBalance = await this.usdc.balanceOf(this.wallet.address);
-      const repayAmount = ourBalance < maxRepayUSDC ? ourBalance : maxRepayUSDC;
+      // Convert to USDC (6 dec)
+      const repayAmount = optimalRepay18 / 10n**12n;
 
       if (repayAmount === 0n) {
-        logger.warn(`Insufficient USDC to liquidate ${pos.borrower}`);
+        logger.warn(`Optimal repay amount is 0 for ${pos.borrower}`);
         return;
       }
 
-      // Ensure allowance
+      // 5. Check our USDC balance
+      const ourBalance = await this.usdc.balanceOf(this.wallet.address);
+      if (ourBalance < repayAmount) {
+        logger.warn(`Insufficient USDC to liquidate ${pos.borrower}. Have: ${ethers.formatUnits(ourBalance, 6)}, Need: ${ethers.formatUnits(repayAmount, 6)}`);
+        
+        // Potential cross-chain opportunity
+        if (config.contracts.crossChainLiquidator) {
+          logger.info(`🌐 Requesting cross-chain liquidation for ${pos.borrower}...`);
+          await this._requestCrossChain(pos.borrower, repayAmount);
+        }
+        return;
+      }
+
+      // 6. Ensure allowance
       const currentAllowance = await this.usdc.allowance(
         this.wallet.address,
         config.contracts.lendingPool
@@ -308,16 +361,17 @@ export class LiquidationBot {
         );
       }
 
-      // Submit liquidation TX
+      // 7. Submit liquidation TX
       const liquidateTx = this.lendingPool.interface.encodeFunctionData("liquidate", [
         pos.borrower,
         repayAmount,
       ]);
 
-      logger.info(`⚡ Submitting liquidation`, {
+      logger.info(`⚡ Submitting optimal liquidation`, {
         borrower: pos.borrower,
         repayAmount: ethers.formatUnits(repayAmount, 6),
         healthFactor: ethers.formatEther(pos.healthFactor),
+        targetHF: this.targetHealthFactor,
       });
 
       await this.txQueue.submit(
@@ -329,6 +383,30 @@ export class LiquidationBot {
       this.totalLiquidations++;
     } catch (error: any) {
       logger.error(`Liquidation failed for ${pos.borrower}`, { error: error.message });
+    }
+  }
+
+  /**
+   * Request funds from source chain via CrossChainLiquidator.
+   */
+  private async _requestCrossChain(borrower: string, amount: bigint): Promise<void> {
+    try {
+      const liquidator = new ethers.Contract(
+        config.contracts.crossChainLiquidator,
+        ["function requestCrossChainLiquidation(address, uint256, uint16)"],
+        this.wallet
+      );
+
+      const tx = await liquidator.requestCrossChainLiquidation(
+        borrower,
+        amount,
+        config.crossChain.sourceChainId
+      );
+      await tx.wait();
+      
+      logger.info(`🌐 Cross-chain request submitted for ${borrower}`);
+    } catch (error: any) {
+      logger.error(`🌐 Cross-chain request failed`, { error: error.message });
     }
   }
 }

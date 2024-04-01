@@ -62,7 +62,8 @@ contract LendingPool is
     uint256 public constant DEBT_DECIMALS = 6;
 
     /// @notice Health factor threshold below which liquidation is allowed
-    uint256 public constant LIQUIDATION_THRESHOLD = PRECISION; // HF < 1.0
+    /// @dev Scaled to 1e18 (1.0 = standard, higher = more aggressive)
+    uint256 public liquidationThreshold;
 
     // ──────────────────────────────────────────────
     //  State Variables
@@ -155,6 +156,7 @@ contract LendingPool is
         ltv = _ltv;
         closeFactor = _closeFactor;
         liquidationIncentive = _liquidationIncentive;
+        liquidationThreshold = PRECISION; // Default to 1.0
         borrowIndex = PRECISION; // Start at 1.0
         lastAccrualTimestamp = block.timestamp;
     }
@@ -294,7 +296,7 @@ contract LendingPool is
 
         // Verify position is liquidatable
         uint256 hf = _calculateHealthFactor(pos);
-        if (hf >= LIQUIDATION_THRESHOLD) revert PositionHealthy(hf);
+        if (hf >= liquidationThreshold) revert PositionHealthy(hf);
 
         // Enforce close factor: max repayable = closeFactor * totalDebt
         uint256 normalizedRepay = _normalizeDebtAmount(repayAmount);
@@ -337,6 +339,11 @@ contract LendingPool is
     /// @return Health factor scaled to 1e18 (1e18 = 1.0, below = liquidatable)
     function getHealthFactor(address user) external view override returns (uint256) {
         return _calculateHealthFactor(_positions[user]);
+    }
+
+    /// @notice Get the current liquidation threshold
+    function getLiquidationThreshold() external view returns (uint256) {
+        return liquidationThreshold;
     }
 
     /// @notice Get full position data for a user
@@ -435,6 +442,14 @@ contract LendingPool is
     /// @notice Unpause
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    /// @notice Update the liquidation threshold (AI risk adjustment)
+    function setLiquidationThreshold(uint256 _threshold) external onlyOwner {
+        if (_threshold < PRECISION) revert InvalidLTV(); // Threshold cannot be below 1.0
+        uint256 oldThreshold = liquidationThreshold;
+        liquidationThreshold = _threshold;
+        emit LiquidationThresholdUpdated(oldThreshold, _threshold);
     }
 
     /// @notice Seed USDC liquidity into the pool (for lending)

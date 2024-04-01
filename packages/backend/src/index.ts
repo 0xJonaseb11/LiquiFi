@@ -60,6 +60,28 @@ async function main() {
       if (response.ok) {
         const data = await response.json();
         bot.updateThresholdFromRiskScore(data.risk_score);
+        
+        // Active on-chain risk management
+        // If risk score is high, update on-chain threshold to liquidate sooner
+        const currentOnChainThreshold = await bot.getStats().currentThreshold;
+        const recommendedThreshold = data.recommended_threshold; // e.g. 1.05
+        
+        const diff = Math.abs(parseFloat(currentOnChainThreshold) - recommendedThreshold);
+        if (diff > 0.01) {
+          logger.info(`🚨 AI recommending on-chain threshold update: ${currentOnChainThreshold} → ${recommendedThreshold}`);
+          
+          const thresholdWei = ethers.parseEther(recommendedThreshold.toFixed(4));
+          const setThresholdData = new ethers.Interface([
+            "function setLiquidationThreshold(uint256)"
+          ]).encodeFunctionData("setLiquidationThreshold", [thresholdWei]);
+          
+          await txQueue.submit(
+            { to: config.contracts.lendingPool, data: setThresholdData },
+            TxPriority.HIGH,
+            `Update on-chain liquidation threshold`
+          );
+        }
+
         logger.info(`AI Risk Score: ${data.risk_score}/100`, { reasoning: data.reasoning });
       }
     } catch {
