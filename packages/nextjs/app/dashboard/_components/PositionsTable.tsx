@@ -5,6 +5,7 @@ import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { formatEther } from "viem";
 import { Address } from "@scaffold-ui/components";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { ListBulletIcon } from "@heroicons/react/24/outline";
 
 type PositionRow = {
   address: string;
@@ -22,14 +23,9 @@ export const PositionsTable = () => {
     functionName: "getBorrowerCount",
   });
 
-  // We need to fetch each borrower individually — SE-2 hooks don't support loops,
-  // so we use a manual approach with indices 0..N
   const count = borrowerCount ? Number(borrowerCount) : 0;
-
-  // Fetch borrowers by index — we'll support up to 20 for the dashboard
   const indices = Array.from({ length: Math.min(count, 20) }, (_, i) => i);
 
-  // Individual borrower reads
   const borrowerReads = indices.map((i) => {
     const { data } = useScaffoldReadContract({
       contractName: "LendingPool",
@@ -39,7 +35,6 @@ export const PositionsTable = () => {
     return data;
   });
 
-  // Fetch positions for each borrower
   const positionReads = borrowerReads.map((addr) => {
     const { data: position } = useScaffoldReadContract({
       contractName: "LendingPool",
@@ -72,52 +67,55 @@ export const PositionsTable = () => {
   const getHFBadge = (hf: bigint) => {
     const hfNum = parseFloat(formatEther(hf));
     if (hf === BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")) {
-      return <span className="badge badge-success badge-sm">∞ Safe</span>;
+      return <span className="text-success font-black">∞ Safe</span>;
     }
-    if (hfNum >= 1.5) return <span className="badge badge-success badge-sm">{hfNum.toFixed(3)}</span>;
-    if (hfNum >= 1.0) return <span className="badge badge-warning badge-sm">{hfNum.toFixed(3)}</span>;
-    return <span className="badge badge-error badge-sm animate-pulse">{hfNum.toFixed(3)} ⚠️</span>;
+    if (hfNum >= 1.5) return <span className="text-success font-black">{hfNum.toFixed(3)}</span>;
+    if (hfNum >= 1.0) return <span className="text-warning font-black">{hfNum.toFixed(3)}</span>;
+    return <span className="text-error font-black animate-pulse">{hfNum.toFixed(3)}</span>;
   };
 
   return (
-    <div className="card bg-base-100 shadow-xl">
-      <div className="card-body">
-        <h2 className="card-title">📋 Active Positions</h2>
-        <div className="overflow-x-auto">
-          <table className="table table-sm">
-            <thead>
-              <tr>
-                <th>Borrower</th>
-                <th>Collateral (WETH)</th>
-                <th>Debt (USDC norm.)</th>
-                <th>Health Factor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {positions.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center opacity-50 py-8">
-                    No active positions
-                  </td>
-                </tr>
-              ) : (
-                positions.map((pos) => (
-                  <tr key={pos.address} className="hover">
-                    <td>
-                      <Address address={pos.address} chain={targetNetwork} />
-                    </td>
-                    <td>{parseFloat(formatEther(pos.collateral)).toFixed(4)}</td>
-                    <td>{parseFloat(formatEther(pos.debt)).toFixed(2)}</td>
-                    <td>{getHFBadge(pos.healthFactor)}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+    <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm">
+      <div className="p-4 border-b border-base-300 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ListBulletIcon className="w-4 h-4 opacity-50" />
+          <h2 className="text-xs uppercase font-black tracking-widest opacity-60">Active Positions</h2>
         </div>
-        <p className="text-xs opacity-50 mt-2">
-          Showing {positions.length} of {count} total borrowers
-        </p>
+        <span className="text-[10px] bg-base-200 px-2 py-0.5 rounded-full font-bold opacity-50">
+          {positions.length} Positions
+        </span>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="table table-zebra table-sm">
+          <thead>
+            <tr className="bg-base-200/50">
+              <th className="text-[10px] uppercase font-black tracking-wider py-4">Borrower</th>
+              <th className="text-[10px] uppercase font-black tracking-wider">Collateral (WETH)</th>
+              <th className="text-[10px] uppercase font-black tracking-wider">Debt (USDC)</th>
+              <th className="text-[10px] uppercase font-black tracking-wider">Health Factor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {positions.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="text-center opacity-40 py-12 italic text-sm">
+                  Zero active positions in protocol
+                </td>
+              </tr>
+            ) : (
+              positions.map((pos) => (
+                <tr key={pos.address} className="hover:bg-primary/5 transition-colors group">
+                  <td className="py-4">
+                    <Address address={pos.address} chain={targetNetwork} />
+                  </td>
+                  <td className="font-medium">{parseFloat(formatEther(pos.collateral)).toFixed(4)}</td>
+                  <td className="font-medium">{parseFloat(formatEther(pos.debt)).toFixed(2)}</td>
+                  <td>{getHFBadge(pos.healthFactor)}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
