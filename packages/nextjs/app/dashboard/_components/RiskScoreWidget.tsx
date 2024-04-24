@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BoltIcon, CpuChipIcon, ShieldExclamationIcon } from "@heroicons/react/24/outline";
 
 type RiskData = {
   risk_score: number;
@@ -26,7 +27,6 @@ export const RiskScoreWidget = () => {
         setRisk(data);
       }
     } catch {
-      // AI service unavailable
       setRisk({
         risk_score: 30,
         reasoning: "AI service offline — using default",
@@ -49,38 +49,68 @@ export const RiskScoreWidget = () => {
     return "text-error";
   };
 
-  const getScoreBg = (score: number) => {
-    if (score < 30) return "radial-progress text-success";
-    if (score < 60) return "radial-progress text-warning";
-    return "radial-progress text-error";
-  };
-
   return (
-    <div className="card bg-base-100 shadow-md">
-      <div className="card-body p-4 flex-row items-center gap-4">
-        <div>
-          <div className="text-xs opacity-60 uppercase">AI Risk Score</div>
-          {risk ? (
-            <div className="flex items-center gap-3">
-              <span className={`text-3xl font-bold ${getScoreColor(risk.risk_score)}`}>{risk.risk_score}</span>
-              <span className="text-xs opacity-50">/100</span>
-            </div>
-          ) : (
-            <span className="loading loading-spinner loading-sm"></span>
-          )}
-          {risk && (
-            <div className="text-xs opacity-50 max-w-48 truncate" title={risk.reasoning}>
-              {risk.reasoning}
-            </div>
-          )}
+    <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
+      <div className="p-4 border-b border-base-300 flex items-center justify-between bg-base-200/30">
+        <div className="flex items-center gap-2">
+          <CpuChipIcon className="w-4 h-4 text-primary" />
+          <h2 className="text-xs uppercase font-black tracking-widest opacity-60">AI Risk Intelligence</h2>
         </div>
-        <div className="flex flex-col items-end text-xs">
-          {risk && (
-            <>
-              <span className="badge badge-ghost badge-xs">{risk.source}</span>
-              <span className="opacity-50 mt-1">Threshold: {risk.recommended_threshold.toFixed(2)}</span>
-            </>
-          )}
+        {loading ? (
+          <BoltIcon className="w-4 h-4 animate-pulse text-warning" />
+        ) : (
+          <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-success/20 text-success">Live</span>
+        )}
+      </div>
+
+      <div className="p-6 flex flex-col flex-grow">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className={`text-5xl font-black tracking-tighter ${getScoreColor(risk?.risk_score || 0)}`}>
+                {risk?.risk_score || "—"}
+              </span>
+              <span className="text-xs font-black opacity-30 uppercase tracking-widest">Score</span>
+            </div>
+            <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1 italic">
+              Scale 0-100 (Safe to Critical)
+            </p>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] font-black opacity-30 uppercase tracking-widest block mb-1">
+              On-Chain Threshold
+            </span>
+            <span className="text-2xl font-black tracking-tighter">
+              {risk?.recommended_threshold.toFixed(2) || "1.05"}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-base-200/50 rounded-lg p-3 border border-base-300/50 flex-grow">
+          <div className="flex items-start gap-2">
+            <ShieldExclamationIcon className="w-4 h-4 opacity-30 mt-0.5" />
+            <div>
+              <span className="text-[10px] font-black opacity-40 uppercase tracking-widest block mb-1 underline">
+                AI Reasoning
+              </span>
+              <p className="text-xs font-medium leading-relaxed opacity-70 italic">"{risk?.reasoning}"</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${risk?.source === "offline" ? "bg-error" : "bg-success"} animate-pulse`}
+            />
+            <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Source: {risk?.source}</span>
+          </div>
+          <button
+            onClick={fetchRisk}
+            className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
+          >
+            Refresh Analysis
+          </button>
         </div>
       </div>
     </div>

@@ -3,115 +3,109 @@
 import Link from "next/link";
 import { Address } from "@scaffold-ui/components";
 import type { NextPage } from "next";
-import { hardhat } from "viem/chains";
-import { useAccount } from "wagmi";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
+import {
+  ArrowRightIcon,
+  ArrowsRightLeftIcon,
+  ChartBarSquareIcon,
+  CpuChipIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
 
 const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
-  const { targetNetwork } = useTargetNetwork();
-
   return (
-    <div className="flex flex-col items-center grow">
+    <div className="flex flex-col min-h-screen bg-base-100">
       {/* Hero Section */}
-      <div className="hero min-h-[60vh] bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10">
-        <div className="hero-content text-center">
-          <div className="max-w-2xl">
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              LiquiFi
-            </h1>
-            <p className="py-2 text-xl opacity-70">DeFi Lending Protocol with AI-Powered Liquidation Engine</p>
-            <p className="text-sm opacity-50 mb-6">Cross-chain liquidation • AI risk scoring • Real-time monitoring</p>
+      <div className="relative flex-grow flex items-center justify-center py-24 px-4 overflow-hidden border-b border-base-300">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)]" />
 
-            {connectedAddress ? (
-              <div className="flex flex-col items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="badge badge-success badge-sm">Connected</span>
-                  <Address
-                    address={connectedAddress}
-                    chain={targetNetwork}
-                    blockExplorerAddressLink={
-                      targetNetwork.id === hardhat.id ? `/blockexplorer/address/${connectedAddress}` : undefined
-                    }
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Link href="/dashboard" className="btn btn-primary btn-lg">
-                    🏦 Open Dashboard
-                  </Link>
-                  <Link href="/debug" className="btn btn-outline btn-lg">
-                    🔧 Debug Contracts
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-4">
-                <p className="text-warning">Connect your wallet to get started</p>
-                <Link href="/dashboard" className="btn btn-primary btn-lg">
-                  🏦 View Dashboard
-                </Link>
-              </div>
-            )}
+        <div className="max-w-4xl text-center z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-8">
+            <CpuChipIcon className="w-3.5 h-3.5" />
+            Autonomous AI Liquidation Protocol
+          </div>
+
+          <h1 className="text-7xl md:text-9xl font-black tracking-tighter mb-8 leading-[0.8] uppercase italic">
+            Liqui<span className="text-primary not-italic">Fi</span>
+          </h1>
+
+          <p className="text-lg md:text-xl opacity-60 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
+            The next generation of lending. Protected by real-time AI risk assessment and cross-chain liquidation nodes
+            via LayerZero.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/dashboard"
+              className="btn btn-primary btn-lg px-12 rounded-xl group font-bold shadow-xl shadow-primary/20"
+            >
+              Enter App
+              <ArrowRightIcon className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link href="/debug" className="btn btn-outline btn-lg px-12 rounded-xl font-bold">
+              Protocol Contracts
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Feature Cards */}
-      <div className="w-full bg-base-200 px-8 py-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-10">Protocol Architecture</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-              <div className="card-body">
-                <h3 className="card-title text-primary">🏦 Lending Pool</h3>
-                <p className="text-sm opacity-70">
-                  Deposit WETH collateral, borrow USDC with 75% LTV. Utilization-based interest rates with jump rate
-                  model.
-                </p>
-              </div>
+      {/* Features Grid */}
+      <div className="container mx-auto px-4 py-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="flex flex-col p-2">
+            <div className="w-12 h-12 rounded-xl premium-gradient flex items-center justify-center text-white mb-8 shadow-lg shadow-primary/20">
+              <ChartBarSquareIcon className="w-6 h-6" />
             </div>
-            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-              <div className="card-body">
-                <h3 className="card-title text-secondary">⚡ Liquidation Engine</h3>
-                <p className="text-sm opacity-70">
-                  Automated bot monitors health factors. Executes optimal partial liquidations with gas management.
-                </p>
-              </div>
+            <h3 className="text-2xl font-black tracking-tight mb-4 uppercase">Lending Pool</h3>
+            <p className="opacity-50 leading-relaxed font-medium">
+              Deposit WETH collateral and borrow USDC with institutional efficiency. Utilization-based interest rates
+              ensure optimal capital flow.
+            </p>
+          </div>
+
+          <div className="flex flex-col p-2">
+            <div className="w-12 h-12 rounded-xl premium-gradient flex items-center justify-center text-white mb-8 shadow-lg shadow-primary/20">
+              <CpuChipIcon className="w-6 h-6" />
             </div>
-            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-              <div className="card-body">
-                <h3 className="card-title text-accent">🌉 Cross-Chain</h3>
-                <p className="text-sm opacity-70">
-                  LayerZero-powered cross-chain fund sourcing for liquidations. State machine with retry & dead-letter
-                  queues.
-                </p>
-              </div>
+            <h3 className="text-2xl font-black tracking-tight mb-4 uppercase">AI Risk Engine</h3>
+            <p className="opacity-50 leading-relaxed font-medium">
+              Our autonomous LLM monitors global sentiment and volatility to dynamically adjust protocol safety margins
+              in real-time.
+            </p>
+          </div>
+
+          <div className="flex flex-col p-2">
+            <div className="w-12 h-12 rounded-xl premium-gradient flex items-center justify-center text-white mb-8 shadow-lg shadow-primary/20">
+              <ArrowsRightLeftIcon className="w-6 h-6" />
             </div>
-            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-              <div className="card-body">
-                <h3 className="card-title text-info">🤖 AI Risk Scoring</h3>
-                <p className="text-sm opacity-70">
-                  GPT-powered market risk assessment. Dynamically adjusts liquidation thresholds based on sentiment
-                  analysis.
-                </p>
-              </div>
-            </div>
+            <h3 className="text-2xl font-black tracking-tight mb-4 uppercase">Cross-Chain Ops</h3>
+            <p className="opacity-50 leading-relaxed font-medium">
+              State-machine based liquidation nodes orchestrate capital across chains via LayerZero, ensuring instant
+              debt resolution.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Quick Links */}
-      <div className="w-full px-8 py-12">
-        <div className="max-w-4xl mx-auto flex justify-center gap-6 flex-wrap">
-          <Link href="/dashboard" className="btn btn-primary gap-2">
-            📊 Dashboard
-          </Link>
-          <Link href="/debug" className="btn btn-secondary gap-2">
-            🔧 Debug Contracts
-          </Link>
-          <Link href="/blockexplorer" className="btn btn-accent gap-2">
-            🔍 Block Explorer
-          </Link>
+      {/* Trust Footer */}
+      <div className="bg-base-200 py-16 border-t border-base-300">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="flex items-center gap-6">
+              <div className="w-14 h-14 rounded-full bg-base-100 flex items-center justify-center border border-base-300 shadow-sm">
+                <ShieldCheckIcon className="w-8 h-8 text-primary" />
+              </div>
+              <div>
+                <h4 className="font-black text-lg uppercase tracking-tight">Hardened Core</h4>
+                <p className="text-xs opacity-40 uppercase tracking-widest font-bold">OpenZeppelin Auditable Logic</p>
+              </div>
+            </div>
+            <div className="flex gap-12 opacity-20 grayscale font-black text-2xl italic uppercase tracking-tighter">
+              <span>WETH</span>
+              <span>USDC</span>
+              <span>Chainlink</span>
+              <span>LZ</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
