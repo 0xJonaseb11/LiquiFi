@@ -1,12 +1,9 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-
 @theme {
   --shadow-center: 0 0 12px -2px rgb(0 0 0 / 0.05);
   --animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --bg-premium-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
 }
 
 @plugin "daisyui" {
@@ -65,15 +62,19 @@
 
 @layer utilities {
   .glass-card {
-    @apply bg-white/10 backdrop-blur-md border border-white/10 shadow-xl;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    @apply shadow-xl;
   }
 
   .premium-gradient {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    background: var(--bg-premium-gradient);
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent premium-gradient;
+    @apply bg-clip-text text-transparent;
+    background-image: var(--bg-premium-gradient);
   }
 }
 
