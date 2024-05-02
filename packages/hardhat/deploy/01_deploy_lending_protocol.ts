@@ -50,6 +50,7 @@ const deployLendingProtocol: DeployFunction = async function (hre: HardhatRuntim
     autoMine: true,
     proxy: {
       proxyContract: "ERC1967Proxy",
+      proxyArgs: ["{implementation}", "{data}"],
       execute: {
         init: {
           methodName: "initialize",
@@ -87,6 +88,7 @@ const deployLendingProtocol: DeployFunction = async function (hre: HardhatRuntim
     autoMine: true,
     proxy: {
       proxyContract: "ERC1967Proxy",
+      proxyArgs: ["{implementation}", "{data}"],
       execute: {
         init: {
           methodName: "initialize",
@@ -117,6 +119,7 @@ const deployLendingProtocol: DeployFunction = async function (hre: HardhatRuntim
     autoMine: true,
     proxy: {
       proxyContract: "ERC1967Proxy",
+      proxyArgs: ["{implementation}", "{data}"],
       execute: {
         init: {
           methodName: "initialize",
@@ -149,6 +152,7 @@ const deployLendingProtocol: DeployFunction = async function (hre: HardhatRuntim
     autoMine: true,
     proxy: {
       proxyContract: "ERC1967Proxy",
+      proxyArgs: ["{implementation}", "{data}"],
       execute: {
         init: {
           methodName: "initialize",

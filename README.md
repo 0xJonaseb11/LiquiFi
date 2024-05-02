@@ -74,6 +74,17 @@ npm run dev
 | `MockWETH.sol` / `MockUSDC.sol` | Test tokens with public mint |
 
 All contracts are **UUPS upgradeable** with custom errors for gas optimization.
+ 
+## Deployments (Base Sepolia)
+ 
+| Contract | Proxy Address | Implementation Address |
+|----------|---------------|------------------------|
+| `LendingPool` | `0x3f061392F32819C0383817E94603F2Ba0708F26F` | `0x018c64dF2EB3d174372Db7AC001b8386e73FaAe8` |
+| `PriceOracle` | `0x12bf27596485137fabdfBDEc93274F47B1ae243F` | `0xc6F7a2fD62943D89daeA86C40819c62dC7C14c7b` |
+| `InterestRateModel` | `0xf94C11F250De861492CBc9809A772308BEe73a5b` | `0xca85fFa7d62371B01676880f95707E8f7de71945` |
+| `CrossChainLiquidator` | `0x7201a71c2FCd7CC26deEC2bC8B0Cb608541F726c` | `0x331DC4AeC3dB525C148D4615d26d2AEacdf036b6` |
+| `MockWETH` | `0xF184F47393591bf6d046bFd36bD1eDBb7457B4B9` | N/A |
+| `MockUSDC` | `0x74a8eb9f2D6d8e098a4FA030a1Eac57B0a6a4106` | N/A |
 
 ## Testing Liquidation Scenarios
 
