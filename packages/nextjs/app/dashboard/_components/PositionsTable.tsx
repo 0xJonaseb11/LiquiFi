@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { Address } from "@scaffold-ui/components";
 import { formatEther } from "viem";
-import { ListBulletIcon } from "@heroicons/react/24/outline";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { FireIcon } from "@heroicons/react/24/outline";
+import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 
 type PositionRow = {
@@ -17,6 +17,10 @@ type PositionRow = {
 export const PositionsTable = () => {
   const [positions, setPositions] = useState<PositionRow[]>([]);
   const { targetNetwork } = useTargetNetwork();
+
+  const { data: poolInfo } = useDeployedContractInfo("LendingPool");
+  const { writeContractAsync: writePool } = useScaffoldWriteContract({ contractName: "LendingPool" });
+  const { writeContractAsync: writeUSDC } = useScaffoldWriteContract({ contractName: "MockUSDC" });
 
   const { data: borrowerCount } = useScaffoldReadContract({
     contractName: "LendingPool",
@@ -64,6 +68,27 @@ export const PositionsTable = () => {
     setPositions(rows);
   }, [JSON.stringify(positionReads.map(r => r.address))]);
 
+  const handleLiquidate = async (borrower: string, debt: bigint) => {
+    try {
+      // Liquidate 50% of debt (assuming 0.5 close factor)
+      const repayAmountNormalized = debt / 2n;
+      const repayAmountActual = repayAmountNormalized / 10n ** 12n; // 18 -> 6 decimals
+
+      await writeUSDC({
+        functionName: "approve",
+        args: [poolInfo?.address, repayAmountActual],
+      });
+
+      await writePool({
+        functionName: "liquidate",
+        args: [borrower, repayAmountActual],
+      });
+    } catch (e) {
+      console.error("Liquidation failed:", e);
+    }
+  };
+
+
   const getHFBadge = (hf: bigint) => {
     const hfNum = parseFloat(formatEther(hf));
     if (hf === BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")) {
@@ -93,12 +118,13 @@ export const PositionsTable = () => {
               <th className="text-[10px] uppercase font-black tracking-wider">Collateral (WETH)</th>
               <th className="text-[10px] uppercase font-black tracking-wider">Debt (USDC)</th>
               <th className="text-[10px] uppercase font-black tracking-wider">Health Factor</th>
+              <th className="text-[10px] uppercase font-black tracking-wider text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {positions.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center opacity-40 py-12 italic text-sm">
+                <td colSpan={5} className="text-center opacity-40 py-12 italic text-sm">
                   Zero active positions in protocol
                 </td>
               </tr>
@@ -111,6 +137,16 @@ export const PositionsTable = () => {
                   <td className="font-medium">{parseFloat(formatEther(pos.collateral)).toFixed(4)}</td>
                   <td className="font-medium">{parseFloat(formatEther(pos.debt)).toFixed(2)}</td>
                   <td>{getHFBadge(pos.healthFactor)}</td>
+                  <td className="text-right">
+                    <button
+                      className="btn btn-ghost btn-xs text-error hover:bg-error/10 disabled:opacity-30"
+                      onClick={() => handleLiquidate(pos.address, pos.debt)}
+                      disabled={parseFloat(formatEther(pos.healthFactor)) >= 1.0}
+                    >
+                      <FireIcon className="w-3.5 h-3.5 mr-1" />
+                      Liquidate
+                    </button>
+                  </td>
                 </tr>
               ))
             )}

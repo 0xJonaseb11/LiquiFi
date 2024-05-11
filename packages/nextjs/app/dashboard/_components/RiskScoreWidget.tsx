@@ -93,7 +93,7 @@ export const RiskScoreWidget = () => {
               <span className="text-[10px] font-black opacity-40 uppercase tracking-widest block mb-1 underline">
                 AI Reasoning
               </span>
-              <p className="text-xs font-medium leading-relaxed opacity-70 italic">"{risk?.reasoning}"</p>
+              <p className="text-xs font-medium leading-relaxed opacity-70 italic">&quot;{risk?.reasoning}&quot;</p>
             </div>
           </div>
         </div>

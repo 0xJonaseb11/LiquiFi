@@ -10,7 +10,7 @@ import {
   CreditCardIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 export const DepositBorrowPanel = () => {
   const { address } = useAccount();
@@ -52,12 +52,15 @@ export const DepositBorrowPanel = () => {
     contractName: "LendingPool",
   });
 
+  // Get contract info for addresses
+  const { data: lendingPoolInfo } = useDeployedContractInfo("LendingPool");
+
   const handleDeposit = async () => {
     try {
       const amount = parseEther(depositAmount);
       await writeMockWETH({
         functionName: "approve",
-        args: ["0x0000000000000000000000000000000000000000", amount], // SE-2 will replace 0x0... with LendingPool addr
+        args: [lendingPoolInfo?.address, amount],
       });
       await writePool({
         functionName: "deposit",
@@ -87,7 +90,7 @@ export const DepositBorrowPanel = () => {
       const amount = parseUnits(repayAmount, 6);
       await writeMockUSDC({
         functionName: "approve",
-        args: ["0x0000000000000000000000000000000000000000", amount],
+        args: [lendingPoolInfo?.address, amount],
       });
       await writePool({
         functionName: "repay",

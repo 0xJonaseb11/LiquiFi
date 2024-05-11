@@ -5,6 +5,7 @@ import { DepositBorrowPanel } from "./_components/DepositBorrowPanel";
 import { PositionsTable } from "./_components/PositionsTable";
 import { ProtocolStats } from "./_components/ProtocolStats";
 import { RiskScoreWidget } from "./_components/RiskScoreWidget";
+import { CrossChainStatus } from "./_components/CrossChainStatus";
 import { ChartBarIcon } from "@heroicons/react/24/outline";
 
 const Dashboard: NextPage = () => {
@@ -41,6 +42,7 @@ const Dashboard: NextPage = () => {
         {/* Terminal Controls */}
         <div className="lg:col-span-4 flex flex-col gap-8">
           <DepositBorrowPanel />
+          <CrossChainStatus />
           <AdminPanel />
         </div>
       </div>
