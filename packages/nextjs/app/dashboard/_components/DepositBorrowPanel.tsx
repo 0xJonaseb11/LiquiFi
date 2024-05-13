@@ -33,12 +33,6 @@ export const DepositBorrowPanel = () => {
     args: [address || "0x0000000000000000000000000000000000000000"],
   });
 
-  const { data: maxBorrow } = useScaffoldReadContract({
-    contractName: "LendingPool",
-    functionName: "getMaxBorrow",
-    args: [address || "0x0000000000000000000000000000000000000000"],
-  });
-
   // Write hooks
   const { writeContractAsync: writeMockWETH } = useScaffoldWriteContract({
     contractName: "MockWETH",

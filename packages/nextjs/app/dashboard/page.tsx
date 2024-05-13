@@ -1,14 +1,14 @@
 "use client";
 
 import { AdminPanel } from "./_components/AdminPanel";
+import { CrossChainStatus } from "./_components/CrossChainStatus";
 import { DepositBorrowPanel } from "./_components/DepositBorrowPanel";
 import { PositionsTable } from "./_components/PositionsTable";
 import { ProtocolStats } from "./_components/ProtocolStats";
 import { RiskScoreWidget } from "./_components/RiskScoreWidget";
-import { CrossChainStatus } from "./_components/CrossChainStatus";
 import { ChartBarIcon } from "@heroicons/react/24/outline";
 
-const Dashboard: NextPage = () => {
+const Dashboard = () => {
   return (
     <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full min-h-screen bg-base-200/20">
       {/* Upper Dashboard Header */}

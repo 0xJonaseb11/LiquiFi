@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { parseEther, parseUnits } from "viem";
-import { AdjustmentsHorizontalIcon, BoltIcon, CurrencyDollarIcon, FireIcon, PauseIcon, PlayIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  BoltIcon,
+  CurrencyDollarIcon,
+  FireIcon,
+  PauseIcon,
+  PlayIcon,
+} from "@heroicons/react/24/outline";
 import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 export const AdminPanel = () => {
@@ -259,7 +266,9 @@ export const AdminPanel = () => {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <FireIcon className="w-3.5 h-3.5 opacity-50" />
-              <span className="text-[10px] uppercase font-black tracking-widest opacity-40">Liquidation Parameters</span>
+              <span className="text-[10px] uppercase font-black tracking-widest opacity-40">
+                Liquidation Parameters
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-2 mb-2">
               <div className="flex flex-col gap-1">
@@ -281,7 +290,11 @@ export const AdminPanel = () => {
                 />
               </div>
             </div>
-            <button className="btn btn-neutral btn-block btn-sm rounded-lg" onClick={handleSetLiquidationParams} disabled={poolPending}>
+            <button
+              className="btn btn-neutral btn-block btn-sm rounded-lg"
+              onClick={handleSetLiquidationParams}
+              disabled={poolPending}
+            >
               Update Risk Params
             </button>
           </div>

@@ -1,7 +1,14 @@
 "use client";
 
+import {
+  ArrowPathIcon,
+  ArrowPathRoundedSquareIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  GlobeAltIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
-import { ArrowPathIcon, CheckCircleIcon, ExclamationTriangleIcon, GlobeAltIcon, ArrowPathRoundedSquareIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 export const CrossChainStatus = () => {
   const { data: nextId } = useScaffoldReadContract({
@@ -48,7 +55,7 @@ const RequestItem = ({ id }: { id: bigint }) => {
   if (!request) return null;
 
   const states = ["NONE", "PENDING", "BRIDGING", "CONFIRMING", "EXECUTING", "COMPLETE", "FAILED"];
-  const state = states[request.state] || "UNKNOWN";
+  const state = states[Number(request[3])] || "UNKNOWN";
 
   const getStatusIcon = () => {
     if (state === "COMPLETE") return <CheckCircleIcon className="w-4 h-4 text-success" />;
@@ -63,27 +70,29 @@ const RequestItem = ({ id }: { id: bigint }) => {
           {getStatusIcon()}
           <div>
             <div className="text-[10px] font-black opacity-40 uppercase leading-none mb-1">REQ #{id.toString()}</div>
-            <div className="text-xs font-bold truncate max-w-[120px]">{request.borrower}</div>
+            <div className="text-xs font-bold truncate max-w-[120px]">{request[1]}</div>
           </div>
         </div>
         <div className="text-right">
-          <div className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
-            state === "COMPLETE" ? "bg-success/20 text-success" : 
-            state === "FAILED" ? "bg-error/20 text-error" : 
-            "bg-primary/20 text-primary"
-          }`}>
+          <div
+            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
+              state === "COMPLETE"
+                ? "bg-success/20 text-success"
+                : state === "FAILED"
+                  ? "bg-error/20 text-error"
+                  : "bg-primary/20 text-primary"
+            }`}
+          >
             {state}
           </div>
-          <div className="text-[10px] opacity-40 font-bold mt-1">
-            {Number(request.repayAmount) / 1e6} USDC
-          </div>
+          <div className="text-[10px] opacity-40 font-bold mt-1">{Number(request[2]) / 1e6} USDC</div>
         </div>
       </div>
-      
+
       {(state === "CONFIRMING" || state === "FAILED") && (
         <div className="flex border-t border-base-300/50">
           {state === "CONFIRMING" && (
-            <button 
+            <button
               className="flex-1 py-1.5 bg-success/10 hover:bg-success/20 text-success text-[10px] font-black uppercase flex items-center justify-center gap-1 transition-colors"
               onClick={() => writeCC({ functionName: "confirmFundsReceived", args: [id] })}
             >
@@ -92,7 +101,7 @@ const RequestItem = ({ id }: { id: bigint }) => {
             </button>
           )}
           {state === "FAILED" && (
-            <button 
+            <button
               className="flex-1 py-1.5 bg-warning/10 hover:bg-warning/20 text-warning text-[10px] font-black uppercase flex items-center justify-center gap-1 transition-colors"
               onClick={() => writeCC({ functionName: "retry", args: [id] })}
             >

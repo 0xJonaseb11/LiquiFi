@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Address } from "@scaffold-ui/components";
 import type { NextPage } from "next";
 import {
   ArrowRightIcon,
