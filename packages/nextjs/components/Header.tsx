@@ -82,9 +82,6 @@ export const Header = () => {
           </ul>
         </details>
         <Link href="/" passHref className="flex items-center gap-2 mr-8 shrink-0">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg premium-gradient text-white">
-            <CpuChipIcon className="w-5 h-5" />
-          </div>
           <div className="flex flex-col">
             <span className="font-black text-xl tracking-tighter leading-none italic uppercase">LiquiFi</span>
             <span className="text-[10px] uppercase tracking-widest opacity-50 font-bold">AI Protocol</span>

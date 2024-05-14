@@ -46,7 +46,7 @@ export const wagmiConnectors = () => {
     ],
 
     {
-      appName: "scaffold-eth-2",
+      appName: "LiquiFi",
       projectId: scaffoldConfig.walletConnectProjectId,
     },
   );
