@@ -9,6 +9,7 @@ import {
   ArrowUpCircleIcon,
   CreditCardIcon,
   ShieldCheckIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
@@ -48,6 +49,22 @@ export const DepositBorrowPanel = () => {
 
   // Get contract info for addresses
   const { data: lendingPoolInfo } = useDeployedContractInfo("LendingPool");
+
+  const handleMintTokens = async () => {
+    try {
+      if (!address) return;
+      await writeMockWETH({
+        functionName: "mint",
+        args: [address, parseEther("100")],
+      });
+      await writeMockUSDC({
+        functionName: "mint",
+        args: [address, parseUnits("100000", 6)],
+      });
+    } catch (e) {
+      console.error("Mint failed:", e);
+    }
+  };
 
   const handleDeposit = async () => {
     try {
@@ -124,9 +141,18 @@ export const DepositBorrowPanel = () => {
 
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex flex-col h-full">
-      <div className="p-4 border-b border-base-300 flex items-center gap-2 bg-base-200/30">
-        <CreditCardIcon className="w-4 h-4 opacity-50" />
-        <h2 className="text-xs uppercase font-black tracking-widest opacity-60 text-gradient">Position Control</h2>
+      <div className="p-4 border-b border-base-300 flex items-center justify-between bg-base-200/30">
+        <div className="flex items-center gap-2">
+          <CreditCardIcon className="w-4 h-4 opacity-50" />
+          <h2 className="text-xs uppercase font-black tracking-widest opacity-60 text-gradient">Position Control</h2>
+        </div>
+        <button
+          onClick={handleMintTokens}
+          className="btn btn-xs btn-outline btn-primary rounded-full px-4 text-[10px] font-black tracking-wider uppercase flex items-center gap-1"
+        >
+          <BanknotesIcon className="w-3 h-3" />
+          Mint Test Tokens
+        </button>
       </div>
 
       <div className="p-6 flex-grow">
@@ -203,7 +229,7 @@ export const DepositBorrowPanel = () => {
               else if (activeTab === "repay") handleRepay();
               else handleWithdraw();
             }}
-            disabled={poolPending}
+            disabled={poolPending || !lendingPoolInfo?.address}
           >
             {poolPending ? (
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
