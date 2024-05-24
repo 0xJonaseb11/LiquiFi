@@ -4,9 +4,10 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hardhat } from "viem/chains";
-import { Bars3Icon, ChartBarSquareIcon, CircleStackIcon, CpuChipIcon } from "@heroicons/react/24/outline";
+import { useAccount } from "wagmi";
+import { Bars3Icon, ChartBarSquareIcon, CircleStackIcon, ShieldExclamationIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
-import { useOutsideClick, useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { useOutsideClick, useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 
 type HeaderMenuLink = {
   label: string;
@@ -29,10 +30,26 @@ export const menuLinks: HeaderMenuLink[] = [
 
 export const HeaderMenuLinks = () => {
   const pathname = usePathname();
+  const { address } = useAccount();
+  const { data: owner } = useScaffoldReadContract({
+    contractName: "LendingPool",
+    functionName: "owner",
+  });
+
+  const isAdmin = address && owner && address === owner;
+
+  const links = [...menuLinks];
+  if (isAdmin) {
+    links.push({
+      label: "Admin",
+      href: "/admin",
+      icon: <ShieldExclamationIcon className="h-4 w-4" />,
+    });
+  }
 
   return (
     <>
-      {menuLinks.map(({ label, href, icon }) => {
+      {links.map(({ label, href, icon }) => {
         const isActive = pathname === href;
         return (
           <li key={href}>

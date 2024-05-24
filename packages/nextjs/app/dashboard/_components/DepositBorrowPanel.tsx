@@ -7,9 +7,9 @@ import {
   ArrowDownCircleIcon,
   ArrowPathIcon,
   ArrowUpCircleIcon,
+  BanknotesIcon,
   CreditCardIcon,
   ShieldCheckIcon,
-  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
