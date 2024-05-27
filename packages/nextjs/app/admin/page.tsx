@@ -1,8 +1,6 @@
 "use client";
 
 import { AdminPanel } from "../dashboard/_components/AdminPanel";
-import { CrossChainStatus } from "../dashboard/_components/CrossChainStatus";
-import { PositionsTable } from "../dashboard/_components/PositionsTable";
 import { ProtocolStats } from "../dashboard/_components/ProtocolStats";
 import { RiskScoreWidget } from "../dashboard/_components/RiskScoreWidget";
 import { ShieldExclamationIcon } from "@heroicons/react/24/outline";
@@ -23,7 +21,7 @@ const AdminPage = () => {
                 Protocol Admin
               </h1>
               <p className="text-[10px] uppercase tracking-[0.3em] font-black opacity-30">
-                System Oversight & Liquidation Management
+                System Oversight & Parameter Controls
               </p>
             </div>
           </div>
@@ -32,19 +30,13 @@ const AdminPage = () => {
           </div>
         </div>
 
-        {/* Protocol Core Statistics */}
+        {/* Protocol Core Statistics (For Admin context) */}
         <ProtocolStats />
 
         {/* Primary Analytics & Interaction Layer */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Market Positions Registry */}
-          <div className="lg:col-span-8 flex flex-col gap-8">
-            <PositionsTable />
-          </div>
-
           {/* Terminal Controls */}
-          <div className="lg:col-span-4 flex flex-col gap-8">
-            <CrossChainStatus />
+          <div className="lg:col-span-12 flex flex-col gap-8">
             <AdminPanel />
           </div>
         </div>

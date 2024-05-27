@@ -63,6 +63,13 @@ const RequestItem = ({ id }: { id: bigint }) => {
     return <ArrowPathIcon className="w-4 h-4 text-primary animate-spin" />;
   };
 
+  let stateColorClass = "bg-primary/20 text-primary";
+  if (state === "COMPLETE") {
+    stateColorClass = "bg-success/20 text-success";
+  } else if (state === "FAILED") {
+    stateColorClass = "bg-error/20 text-error";
+  }
+
   return (
     <div className="flex flex-col bg-base-200/50 rounded-lg border border-base-300/50 overflow-hidden">
       <div className="flex items-center justify-between p-3">
@@ -74,17 +81,7 @@ const RequestItem = ({ id }: { id: bigint }) => {
           </div>
         </div>
         <div className="text-right">
-          <div
-            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
-              state === "COMPLETE"
-                ? "bg-success/20 text-success"
-                : state === "FAILED"
-                  ? "bg-error/20 text-error"
-                  : "bg-primary/20 text-primary"
-            }`}
-          >
-            {state}
-          </div>
+          <div className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${stateColorClass}`}>{state}</div>
           <div className="text-[10px] opacity-40 font-bold mt-1">{Number(request[2]) / 1e6} USDC</div>
         </div>
       </div>

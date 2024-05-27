@@ -1,10 +1,14 @@
 "use client";
 
-import { Address } from "@scaffold-ui/components";
-import { formatEther } from "viem";
+import { formatEther, formatUnits } from "viem";
 import { FireIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { Address } from "~~/components/scaffold-eth";
+import {
+  useDeployedContractInfo,
+  useScaffoldReadContract,
+  useScaffoldWriteContract,
+  useTargetNetwork,
+} from "~~/hooks/scaffold-eth";
 
 export const PositionsTable = () => {
   const { targetNetwork } = useTargetNetwork();
@@ -57,7 +61,7 @@ export const PositionsTable = () => {
 };
 
 const PositionItem = ({ index, chain }: { index: bigint; chain: any }) => {
-  const { data: poolInfo } = useDeployedContractInfo("LendingPool");
+  const { data: lendingPoolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
   const { writeContractAsync: writePool } = useScaffoldWriteContract({ contractName: "LendingPool" });
   const { writeContractAsync: writeUSDC } = useScaffoldWriteContract({ contractName: "MockUSDC" });
 

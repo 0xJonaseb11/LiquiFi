@@ -48,7 +48,7 @@ export const DepositBorrowPanel = () => {
   });
 
   // Get contract info for addresses
-  const { data: lendingPoolInfo } = useDeployedContractInfo("LendingPool");
+  const { data: lendingPoolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
 
   const handleMintTokens = async () => {
     try {
@@ -126,12 +126,15 @@ export const DepositBorrowPanel = () => {
     }
   };
 
-  const hfNum = healthFactor ? parseFloat(formatEther(healthFactor)) : 0;
-  const hfDisplay = healthFactor
-    ? healthFactor === BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
-      ? "∞"
-      : hfNum.toFixed(3)
-    : "—";
+  const hfNum = healthFactor ? Number.parseFloat(formatEther(healthFactor)) : 0;
+  let hfDisplay = "—";
+  if (healthFactor) {
+    if (healthFactor === BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")) {
+      hfDisplay = "∞";
+    } else {
+      hfDisplay = hfNum.toFixed(3);
+    }
+  }
 
   const getHFColor = () => {
     if (hfDisplay === "∞" || hfNum >= 1.5) return "text-success";
@@ -161,14 +164,14 @@ export const DepositBorrowPanel = () => {
           <div className="flex flex-col">
             <span className="text-[10px] uppercase opacity-40 font-black mb-1">Collateral</span>
             <span className="font-black tracking-tighter">
-              {parseFloat(formatEther(position?.collateralAmount || 0n)).toFixed(3)}{" "}
+              {Number.parseFloat(formatEther(position?.collateralAmount || 0n)).toFixed(3)}{" "}
               <span className="text-[10px] opacity-40">WETH</span>
             </span>
           </div>
           <div className="flex flex-col border-x border-base-300 px-4">
             <span className="text-[10px] uppercase opacity-40 font-black mb-1">Debt</span>
             <span className="font-black tracking-tighter">
-              {parseFloat(formatEther(position?.debtAmount || 0n)).toFixed(2)}{" "}
+              {Number.parseFloat(formatEther(position?.debtAmount || 0n)).toFixed(2)}{" "}
               <span className="text-[10px] opacity-40">USDC</span>
             </span>
           </div>
@@ -198,7 +201,7 @@ export const DepositBorrowPanel = () => {
           <div className="relative">
             <input
               type="number"
-              placeholder="0.00"
+              placeholder="0"
               className="w-full bg-base-200 border-none rounded-xl p-4 pr-16 font-black text-2xl focus:ring-1 focus:ring-primary/30 transition-all outline-none"
               value={
                 activeTab === "deposit"

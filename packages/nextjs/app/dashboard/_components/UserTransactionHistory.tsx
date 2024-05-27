@@ -99,6 +99,47 @@ export const UserTransactionHistory = () => {
   // Sort descending by block number
   history.sort((a, b) => Number(b.blockNumber - a.blockNumber));
 
+  let content;
+  if (isLoading) {
+    content = (
+      <div className="flex justify-center p-8">
+        <span className="loading loading-spinner text-primary"></span>
+      </div>
+    );
+  } else if (history.length === 0) {
+    content = <div className="text-center p-8 opacity-40 italic text-sm">No recent transactions</div>;
+  } else {
+    content = (
+      <table className="table table-sm w-full">
+        <tbody>
+          {history.map((tx, idx) => (
+            <tr key={`${tx.txHash}-${idx}`} className="hover:bg-base-200 transition-colors">
+              <td className="w-10">
+                {tx.type === "Deposit" || tx.type === "Repay" ? (
+                  <ArrowDownRightIcon className="w-4 h-4 text-success" />
+                ) : (
+                  <ArrowUpRightIcon className="w-4 h-4 text-warning" />
+                )}
+              </td>
+              <td>
+                <div className="font-bold text-xs uppercase">{tx.type}</div>
+                <div className="text-[10px] opacity-40 font-mono">
+                  {tx.txHash.slice(0, 6)}...{tx.txHash.slice(-4)}
+                </div>
+              </td>
+              <td className="text-right font-medium">
+                {tx.asset === "WETH"
+                  ? Number.parseFloat(formatEther(tx.amount)).toFixed(4)
+                  : Number.parseFloat(formatUnits(tx.amount, 6)).toFixed(2)}{" "}
+                <span className="text-[10px] opacity-50">{tx.asset}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex flex-col h-full">
       <div className="p-4 border-b border-base-300 flex items-center gap-2 bg-base-200/30">
@@ -106,43 +147,7 @@ export const UserTransactionHistory = () => {
         <h2 className="text-xs uppercase font-black tracking-widest opacity-60">Transaction History</h2>
       </div>
 
-      <div className="p-0 overflow-y-auto max-h-[400px]">
-        {isLoading ? (
-          <div className="flex justify-center p-8">
-            <span className="loading loading-spinner text-primary"></span>
-          </div>
-        ) : history.length === 0 ? (
-          <div className="text-center p-8 opacity-40 italic text-sm">No recent transactions</div>
-        ) : (
-          <table className="table table-sm w-full">
-            <tbody>
-              {history.map((tx, idx) => (
-                <tr key={`${tx.txHash}-${idx}`} className="hover:bg-base-200 transition-colors">
-                  <td className="w-10">
-                    {tx.type === "Deposit" || tx.type === "Repay" ? (
-                      <ArrowDownRightIcon className="w-4 h-4 text-success" />
-                    ) : (
-                      <ArrowUpRightIcon className="w-4 h-4 text-warning" />
-                    )}
-                  </td>
-                  <td>
-                    <div className="font-bold text-xs uppercase">{tx.type}</div>
-                    <div className="text-[10px] opacity-40 font-mono">
-                      {tx.txHash.slice(0, 6)}...{tx.txHash.slice(-4)}
-                    </div>
-                  </td>
-                  <td className="text-right font-medium">
-                    {tx.asset === "WETH"
-                      ? parseFloat(formatEther(tx.amount)).toFixed(4)
-                      : parseFloat(formatUnits(tx.amount, 6)).toFixed(2)}{" "}
-                    <span className="text-[10px] opacity-50">{tx.asset}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <div className="p-0 overflow-y-auto max-h-[400px]">{content}</div>
     </div>
   );
 };

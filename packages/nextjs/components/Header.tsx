@@ -5,7 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hardhat } from "viem/chains";
 import { useAccount } from "wagmi";
-import { Bars3Icon, ChartBarSquareIcon, CircleStackIcon, ShieldExclamationIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  ChartBarSquareIcon,
+  CircleStackIcon,
+  ShieldExclamationIcon,
+  WalletIcon,
+} from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick, useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 
@@ -14,12 +20,16 @@ type HeaderMenuLink = {
   href: string;
   icon?: React.ReactNode;
 };
-
 export const menuLinks: HeaderMenuLink[] = [
   {
     label: "Dashboard",
     href: "/dashboard",
     icon: <ChartBarSquareIcon className="h-4 w-4" />,
+  },
+  {
+    label: "Portfolio",
+    href: "/portfolio",
+    icon: <WalletIcon className="h-4 w-4" />,
   },
   {
     label: "Debug",
