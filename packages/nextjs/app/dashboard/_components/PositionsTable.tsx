@@ -61,7 +61,7 @@ export const PositionsTable = () => {
 };
 
 const PositionItem = ({ index, chain }: { index: bigint; chain: any }) => {
-  const { data: lendingPoolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
+  const { data: poolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
   const { writeContractAsync: writePool } = useScaffoldWriteContract({ contractName: "LendingPool" });
   const { writeContractAsync: writeUSDC } = useScaffoldWriteContract({ contractName: "MockUSDC" });
 
@@ -119,14 +119,14 @@ const PositionItem = ({ index, chain }: { index: bigint; chain: any }) => {
       <td className="py-4">
         <Address address={borrower} chain={chain} />
       </td>
-      <td className="font-medium">{parseFloat(formatEther(position.collateralAmount)).toFixed(4)}</td>
-      <td className="font-medium">{parseFloat(formatEther(position.debtAmount)).toFixed(2)}</td>
+      <td className="font-medium">{Number.parseFloat(formatEther(position.collateralAmount)).toFixed(4)}</td>
+      <td className="font-medium">{Number.parseFloat(formatUnits(position.debtAmount, 6)).toFixed(2)}</td>
       <td>{getHFBadge(hf || 0n)}</td>
       <td className="text-right">
         <button
           className="btn btn-ghost btn-xs text-error hover:bg-error/10 disabled:opacity-30"
           onClick={handleLiquidate}
-          disabled={parseFloat(formatEther(hf || 0n)) >= 1.0}
+          disabled={Number.parseFloat(formatEther(hf || 0n)) >= 1.0}
         >
           <FireIcon className="w-3.5 h-3.5 mr-1" />
           Liquidate
