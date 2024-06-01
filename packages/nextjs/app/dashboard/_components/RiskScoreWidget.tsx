@@ -17,7 +17,12 @@ export const RiskScoreWidget = () => {
   const fetchRisk = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/risk-score", {
+      const backendUrl = process.env.NEXT_PUBLIC_AI_BACKEND_URL;
+      if (!backendUrl) {
+        throw new Error("No backend URL configured");
+      }
+
+      const res = await fetch(`${backendUrl}/api/risk-score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prices: { ETH: 2000, USDC: 1 }, headlines: [] }),

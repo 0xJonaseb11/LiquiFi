@@ -2,17 +2,9 @@
 
 import { formatEther, formatUnits } from "viem";
 import { FireIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
-import {
-  useDeployedContractInfo,
-  useScaffoldReadContract,
-  useScaffoldWriteContract,
-  useTargetNetwork,
-} from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 export const PositionsTable = () => {
-  const { targetNetwork } = useTargetNetwork();
-
   const { data: borrowerCount } = useScaffoldReadContract({
     contractName: "LendingPool",
     functionName: "getBorrowerCount",
@@ -51,7 +43,7 @@ export const PositionsTable = () => {
                 </td>
               </tr>
             ) : (
-              indices.map(i => <PositionItem key={i} index={BigInt(i)} chain={targetNetwork} />)
+              indices.map(i => <PositionItem key={i} index={BigInt(i)} />)
             )}
           </tbody>
         </table>
@@ -60,7 +52,7 @@ export const PositionsTable = () => {
   );
 };
 
-const PositionItem = ({ index, chain }: { index: bigint; chain: any }) => {
+const PositionItem = ({ index }: { index: bigint }) => {
   const { data: poolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
   const { writeContractAsync: writePool } = useScaffoldWriteContract({ contractName: "LendingPool" });
   const { writeContractAsync: writeUSDC } = useScaffoldWriteContract({ contractName: "MockUSDC" });
@@ -116,8 +108,8 @@ const PositionItem = ({ index, chain }: { index: bigint; chain: any }) => {
 
   return (
     <tr className="hover:bg-primary/5 transition-colors group">
-      <td className="py-4">
-        <Address address={borrower} chain={chain} />
+      <td className="py-4 font-mono text-xs opacity-80">
+        {borrower.slice(0, 6)}...{borrower.slice(-4)}
       </td>
       <td className="font-medium">{Number.parseFloat(formatEther(position.collateralAmount)).toFixed(4)}</td>
       <td className="font-medium">{Number.parseFloat(formatUnits(position.debtAmount, 6)).toFixed(2)}</td>
