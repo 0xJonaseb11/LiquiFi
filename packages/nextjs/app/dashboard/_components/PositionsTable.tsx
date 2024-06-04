@@ -1,6 +1,6 @@
 "use client";
 
-import { formatEther, formatUnits } from "viem";
+import { formatEther } from "viem";
 import { FireIcon, ListBulletIcon } from "@heroicons/react/24/outline";
 import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
@@ -112,7 +112,7 @@ const PositionItem = ({ index }: { index: bigint }) => {
         {borrower.slice(0, 6)}...{borrower.slice(-4)}
       </td>
       <td className="font-medium">{Number.parseFloat(formatEther(position.collateralAmount)).toFixed(4)}</td>
-      <td className="font-medium">{Number.parseFloat(formatUnits(position.debtAmount, 6)).toFixed(2)}</td>
+      <td className="font-medium">{Number.parseFloat(formatEther(position.debtAmount)).toFixed(2)}</td>
       <td>{getHFBadge(hf || 0n)}</td>
       <td className="text-right">
         <button
