@@ -47,33 +47,22 @@ const ChainAwareProviders = ({ children }: { children: React.ReactNode }) => {
     setMounted(true);
   }, []);
 
-  // EVM mode: Wagmi + RainbowKit (existing stack)
-  if (isEvm) {
-    return (
-      <WagmiProvider config={wagmiConfig}>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider
-            avatar={BlockieAvatar}
-            theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
-          >
-            <ProgressBar height="3px" color="#2299dd" />
-            <ScaffoldEthApp>{children}</ScaffoldEthApp>
-          </RainbowKitProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
-    );
-  }
-
-  // Polkadot mode: Polkadot providers
   return (
-    <PolkadotProvider>
-      <PolkadotContractProvider>
-        <QueryClientProvider client={queryClient}>
-          <ProgressBar height="3px" color="#e6007a" />
-          <ScaffoldEthApp>{children}</ScaffoldEthApp>
-        </QueryClientProvider>
-      </PolkadotContractProvider>
-    </PolkadotProvider>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <PolkadotProvider>
+          <PolkadotContractProvider>
+            <RainbowKitProvider
+              avatar={BlockieAvatar}
+              theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
+            >
+              <ProgressBar height="3px" color={isEvm ? "#2299dd" : "#e6007a"} />
+              <ScaffoldEthApp>{children}</ScaffoldEthApp>
+            </RainbowKitProvider>
+          </PolkadotContractProvider>
+        </PolkadotProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 };
 
