@@ -6,8 +6,13 @@ import { PositionsTable } from "./_components/PositionsTable";
 import { ProtocolStats } from "./_components/ProtocolStats";
 import { RiskScoreWidget } from "./_components/RiskScoreWidget";
 import { ChartBarIcon, WalletIcon } from "@heroicons/react/24/outline";
+import { useChainContext } from "~~/contexts/ChainContext";
+import scaffoldConfig from "~~/scaffold.config";
 
 const Dashboard = () => {
+  const { isEvm } = useChainContext();
+  const networkName = isEvm ? "EVM / Hardhat" : (scaffoldConfig as any).polkadotConfig?.networkName || "Polkadot";
+
   return (
     <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full min-h-screen bg-base-200/20">
       {/* Upper Dashboard Header */}
@@ -60,7 +65,7 @@ const Dashboard = () => {
 
       {/* Protocol Footer Status */}
       <div className="mt-4 flex items-center justify-center gap-6 opacity-20 text-[10px] font-black uppercase tracking-[0.5em]">
-        <span>Network: Hardhat</span>
+        <span>Network: {networkName}</span>
         <span>•</span>
         <span>Version: 1.0.0-PROTOTYPE</span>
       </div>

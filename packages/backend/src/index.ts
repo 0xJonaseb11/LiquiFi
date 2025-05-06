@@ -6,6 +6,8 @@ import { TransactionQueue } from "./transaction-queue";
 import { LiquidationBot } from "./liquidation-bot";
 import { MockPriceFeed } from "./price-feed";
 import { CrossChainModule } from "./cross-chain-module";
+import { EvmAdapter } from "./adapters/evm-adapter";
+import { PolkadotAdapter } from "./adapters/polkadot-adapter";
 
 /**
  * LiquiFi Bot — Main entry point.
@@ -17,22 +19,16 @@ async function main() {
   logger.info("  🏦 LiquiFi Liquidation Bot Starting...");
   logger.info("═".repeat(50));
 
-  // 1. Initialize provider & wallet
-  const provider = new ethers.JsonRpcProvider(config.rpcUrl);
-  const wallet = new ethers.Wallet(config.privateKey, provider);
-  logger.info(`Wallet: ${wallet.address}`);
+  const chainType = process.env.CHAIN_TYPE || "evm";
+  logger.info(`Target Chain: ${chainType.toUpperCase()}`);
 
-  // 2. Initialize nonce manager
-  const nonceManager = new NonceManager(provider, wallet);
-  await nonceManager.initialize();
+  // 1. Initialize Adapter
+  const adapter = chainType === "polkadot" ? new PolkadotAdapter() : new EvmAdapter();
 
-  // 3. Initialize transaction queue
-  const txQueue = new TransactionQueue(nonceManager);
+  // 2. Initialize liquidation bot with adapter
+  const bot = new LiquidationBot(adapter);
 
-  // 4. Initialize liquidation bot
-  const bot = new LiquidationBot(provider, wallet, nonceManager, txQueue);
-
-  // 5. Initialize price feed (mock for local)
+  // 3. Initialize price feed (mock for local)
   const priceFeed = new MockPriceFeed();
   priceFeed.on("priceUpdate", ({ asset, price }: any) => {
     logger.debug(`Price update: ${asset} = $${price.toFixed(2)}`);
@@ -42,11 +38,7 @@ async function main() {
   });
   priceFeed.connect();
 
-  // 6. Initialize cross-chain module
-  const crossChain = new CrossChainModule(provider, wallet);
-  crossChain.startListeners();
-
-  // 7. AI risk scoring — poll periodically
+  // 4. AI risk scoring — poll periodically
   const aiUpdateLoop = setInterval(async () => {
     try {
       const response = await fetch(`${config.ai.serviceUrl}/api/risk-score`, {
@@ -58,28 +50,16 @@ async function main() {
         }),
       });
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as any;
         bot.updateThresholdFromRiskScore(data.risk_score);
         
         // Active on-chain risk management
-        // If risk score is high, update on-chain threshold to liquidate sooner
-        const currentOnChainThreshold = await bot.getStats().currentThreshold;
+        const currentOnChainThreshold = bot.getStats().currentThreshold;
         const recommendedThreshold = data.recommended_threshold; // e.g. 1.05
         
         const diff = Math.abs(parseFloat(currentOnChainThreshold) - recommendedThreshold);
         if (diff > 0.01) {
           logger.info(`🚨 AI recommending on-chain threshold update: ${currentOnChainThreshold} → ${recommendedThreshold}`);
-          
-          const thresholdWei = ethers.parseEther(recommendedThreshold.toFixed(4));
-          const setThresholdData = new ethers.Interface([
-            "function setLiquidationThreshold(uint256)"
-          ]).encodeFunctionData("setLiquidationThreshold", [thresholdWei]);
-          
-          await txQueue.submit(
-            { to: config.contracts.lendingPool, data: setThresholdData },
-            TxPriority.HIGH,
-            `Update on-chain liquidation threshold`
-          );
         }
 
         logger.info(`AI Risk Score: ${data.risk_score}/100`, { reasoning: data.reasoning });
@@ -89,12 +69,7 @@ async function main() {
     }
   }, config.ai.updateIntervalMs);
 
-  // 8. Stuck TX monitor
-  const stuckTxLoop = setInterval(async () => {
-    await nonceManager.checkStuckTransactions(config.bot.txTimeoutMs, config.bot.gasPriceBumpPercent);
-  }, 15000);
-
-  // 9. Start the bot
+  // 5. Start the bot
   await bot.start();
 
   // Graceful shutdown
@@ -103,7 +78,6 @@ async function main() {
     bot.stop();
     priceFeed.disconnect();
     clearInterval(aiUpdateLoop);
-    clearInterval(stuckTxLoop);
     process.exit(0);
   };
 

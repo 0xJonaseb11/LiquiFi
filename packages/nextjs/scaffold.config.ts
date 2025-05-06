@@ -9,7 +9,17 @@ export type BaseConfig = {
   burnerWalletMode: "localNetworksOnly" | "allNetworks" | "disabled";
 };
 
-export type ScaffoldConfig = BaseConfig;
+export type PolkadotNetworkConfig = {
+  rpcEndpoint: string;
+  networkName: string;
+  tokenSymbol: string;
+  tokenDecimals: number;
+  contractAddresses: Record<string, string>;
+};
+
+export type ScaffoldConfig = BaseConfig & {
+  polkadotConfig?: PolkadotNetworkConfig;
+};
 
 export const DEFAULT_ALCHEMY_API_KEY = "cR4WnXePioePZ5fFrnSiR";
 
@@ -39,6 +49,21 @@ const scaffoldConfig = {
   // - "allNetworks": show on any configured target networks
   // - "disabled": completely disable
   burnerWalletMode: "localNetworksOnly",
+  // Polkadot / Astar configuration
+  polkadotConfig: {
+    rpcEndpoint: process.env.NEXT_PUBLIC_POLKADOT_RPC || "wss://rpc.shibuya.astar.network",
+    networkName: "Shibuya (Astar Testnet)",
+    tokenSymbol: "SBY",
+    tokenDecimals: 18,
+    contractAddresses: {
+      // Placeholder — update after deploying ink! contracts
+      LendingPool: process.env.NEXT_PUBLIC_POLKADOT_LENDING_POOL || "",
+      PriceOracle: process.env.NEXT_PUBLIC_POLKADOT_PRICE_ORACLE || "",
+      InterestRateModel: process.env.NEXT_PUBLIC_POLKADOT_INTEREST_RATE_MODEL || "",
+      MockWDOT: process.env.NEXT_PUBLIC_POLKADOT_MOCK_WDOT || "",
+      MockUSDC: process.env.NEXT_PUBLIC_POLKADOT_MOCK_USDC || "",
+    },
+  },
 } as const satisfies ScaffoldConfig;
 
 /**

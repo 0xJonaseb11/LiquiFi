@@ -8,12 +8,14 @@ import {
   GlobeAltIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useChainContext } from "~~/contexts/ChainContext";
+import { useChainReadContract, useChainWriteContract } from "~~/hooks/useChainContract";
 
 export const CrossChainStatus = () => {
-  const { data: nextId } = useScaffoldReadContract({
-    contractName: "CrossChainLiquidator",
-    functionName: "nextRequestId",
+  const { isEvm } = useChainContext();
+  const { data: nextId } = useChainReadContract({
+    contractName: isEvm ? "CrossChainLiquidator" : "XCMLiquidator",
+    functionName: isEvm ? "nextRequestId" : "next_request_id", // Assuming a getter or just showing empty for now
   });
 
   const lastId = nextId ? Number(nextId) - 1 : 0;
@@ -42,14 +44,15 @@ export const CrossChainStatus = () => {
 };
 
 const RequestItem = ({ id }: { id: bigint }) => {
-  const { data: request } = useScaffoldReadContract({
-    contractName: "CrossChainLiquidator",
-    functionName: "requests",
+  const { isEvm } = useChainContext();
+  const { data: request } = useChainReadContract({
+    contractName: isEvm ? "CrossChainLiquidator" : "XCMLiquidator",
+    functionName: isEvm ? "requests" : "get_request", // Simplified for Polkadot
     args: [id],
   });
 
-  const { writeContractAsync: writeCC } = useScaffoldWriteContract({
-    contractName: "CrossChainLiquidator",
+  const { writeContractAsync: writeCC } = useChainWriteContract({
+    contractName: isEvm ? "CrossChainLiquidator" : "XCMLiquidator",
   });
 
   if (!request) return null;

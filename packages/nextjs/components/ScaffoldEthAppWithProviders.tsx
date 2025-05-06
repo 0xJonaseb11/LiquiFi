@@ -10,6 +10,9 @@ import { WagmiProvider } from "wagmi";
 import { Footer } from "~~/components/Footer";
 import { Header } from "~~/components/Header";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
+import { ChainProvider, useChainContext } from "~~/contexts/ChainContext";
+import { PolkadotContractProvider } from "~~/providers/PolkadotContractProvider";
+import { PolkadotProvider } from "~~/providers/PolkadotProvider";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
@@ -33,26 +36,51 @@ export const queryClient = new QueryClient({
   },
 });
 
-export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
+/** Inner component that reads chainType from context */
+const ChainAwareProviders = ({ children }: { children: React.ReactNode }) => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const [mounted, setMounted] = useState(false);
+  const { isEvm } = useChainContext();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // EVM mode: Wagmi + RainbowKit (existing stack)
+  if (isEvm) {
+    return (
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider
+            avatar={BlockieAvatar}
+            theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
+          >
+            <ProgressBar height="3px" color="#2299dd" />
+            <ScaffoldEthApp>{children}</ScaffoldEthApp>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    );
+  }
+
+  // Polkadot mode: Polkadot providers
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          avatar={BlockieAvatar}
-          theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
-        >
-          <ProgressBar height="3px" color="#2299dd" />
+    <PolkadotProvider>
+      <PolkadotContractProvider>
+        <QueryClientProvider client={queryClient}>
+          <ProgressBar height="3px" color="#e6007a" />
           <ScaffoldEthApp>{children}</ScaffoldEthApp>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+        </QueryClientProvider>
+      </PolkadotContractProvider>
+    </PolkadotProvider>
+  );
+};
+
+export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <ChainProvider>
+      <ChainAwareProviders>{children}</ChainAwareProviders>
+    </ChainProvider>
   );
 };

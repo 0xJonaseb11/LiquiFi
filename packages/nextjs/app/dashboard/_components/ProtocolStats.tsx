@@ -8,30 +8,32 @@ import {
   PresentationChartLineIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useChainContext } from "~~/contexts/ChainContext";
+import { useChainReadContract } from "~~/hooks/useChainContract";
 
 export const ProtocolStats = () => {
-  const { data: totalDeposits } = useScaffoldReadContract({
+  const { isEvm } = useChainContext();
+  const { data: totalDeposits } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getTotalDeposits",
   });
 
-  const { data: totalBorrows } = useScaffoldReadContract({
+  const { data: totalBorrows } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getTotalBorrows",
   });
 
-  const { data: utilizationRate } = useScaffoldReadContract({
+  const { data: utilizationRate } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getUtilizationRate",
   });
 
-  const { data: borrowRate } = useScaffoldReadContract({
+  const { data: borrowRate } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getBorrowRate",
   });
 
-  const { data: borrowerCount } = useScaffoldReadContract({
+  const { data: borrowerCount } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getBorrowerCount",
   });
@@ -39,7 +41,7 @@ export const ProtocolStats = () => {
   const stats = [
     {
       label: "Total TVL",
-      value: totalDeposits ? `${parseFloat(formatEther(totalDeposits)).toFixed(2)} WETH` : "—",
+      value: totalDeposits ? `${parseFloat(formatEther(totalDeposits)).toFixed(2)} ${isEvm ? "WETH" : "wDOT"}` : "—",
       icon: <BanknotesIcon className="w-4 h-4" />,
       color: "text-success",
     },

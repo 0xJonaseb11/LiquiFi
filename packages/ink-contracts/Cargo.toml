@@ -6,6 +6,7 @@ members = [
     "contracts/price_oracle",
     "contracts/interest_rate_model",
     "contracts/lending_pool",
+    "contracts/xcm_liquidator",
 ]
 resolver = "2"
 
@@ -13,7 +14,7 @@ resolver = "2"
 ink = { version = "5.1", default-features = false }
 scale = { package = "parity-scale-codec", version = "3.7", default-features = false, features = ["derive"] }
 scale-info = { version = "2.11", default-features = false, features = ["derive"] }
-pendzl = { version = "4.0.0-beta.2", default-features = false }
+pendzl = { version = "1.0.2", default-features = false }
 
 [profile.release]
 codegen-units = 1

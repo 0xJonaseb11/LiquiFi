@@ -12,7 +12,10 @@ import {
   ShieldExclamationIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
+import { NetworkToggle } from "~~/components/NetworkToggle";
+import { PolkadotConnectButton } from "~~/components/PolkadotConnectButton";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
+import { useChainContext } from "~~/contexts/ChainContext";
 import { useOutsideClick, useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 
 type HeaderMenuLink = {
@@ -40,13 +43,16 @@ export const menuLinks: HeaderMenuLink[] = [
 
 export const HeaderMenuLinks = () => {
   const pathname = usePathname();
+  const { isEvm } = useChainContext();
+
+  // Only read owner from EVM contracts when in EVM mode
   const { address } = useAccount();
   const { data: owner } = useScaffoldReadContract({
     contractName: "LendingPool",
     functionName: "owner",
   });
 
-  const isAdmin = address && owner && address === owner;
+  const isAdmin = isEvm && address && owner && address === owner;
 
   const links = [...menuLinks];
   if (isAdmin) {
@@ -81,11 +87,13 @@ export const HeaderMenuLinks = () => {
 };
 
 /**
- * Site header
+ * Site header — now with network toggle and chain-aware wallet button
  */
 export const Header = () => {
+  const { isEvm } = useChainContext();
+
   const { targetNetwork } = useTargetNetwork();
-  const isLocalNetwork = targetNetwork.id === hardhat.id;
+  const isLocalNetwork = isEvm && targetNetwork.id === hardhat.id;
 
   const burgerMenuRef = useRef<HTMLDetailsElement>(null);
   useOutsideClick(burgerMenuRef, () => {
@@ -119,8 +127,15 @@ export const Header = () => {
         </ul>
       </div>
       <div className="navbar-end grow gap-4">
-        <RainbowKitCustomConnectButton />
-        {isLocalNetwork && <FaucetButton />}
+        <NetworkToggle />
+        {isEvm ? (
+          <>
+            <RainbowKitCustomConnectButton />
+            {isLocalNetwork && <FaucetButton />}
+          </>
+        ) : (
+          <PolkadotConnectButton />
+        )}
       </div>
     </div>
   );

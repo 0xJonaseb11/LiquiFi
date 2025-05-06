@@ -10,9 +10,12 @@ import {
   PauseIcon,
   PlayIcon,
 } from "@heroicons/react/24/outline";
-import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useChainContext } from "~~/contexts/ChainContext";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
+import { useChainReadContract, useChainWriteContract } from "~~/hooks/useChainContract";
 
 export const AdminPanel = () => {
+  const { isEvm } = useChainContext();
   const [ethPrice, setEthPrice] = useState("2000");
   const [liquidateAddr, setLiquidateAddr] = useState("");
   const [liquidateAmount, setLiquidateAmount] = useState("");
@@ -22,23 +25,23 @@ export const AdminPanel = () => {
   const [incentive, setIncentive] = useState("5");
   const [threshold, setThreshold] = useState("100");
 
-  const { data: wethInfo } = useDeployedContractInfo("MockWETH");
+  const { data: collateralInfo } = useDeployedContractInfo(isEvm ? "MockWETH" : "MockWDOT");
   const { data: usdcInfo } = useDeployedContractInfo("MockUSDC");
   const { data: poolInfo } = useDeployedContractInfo("LendingPool");
 
-  const { writeContractAsync: writeOracle, isPending: oraclePending } = useScaffoldWriteContract({
+  const { writeContractAsync: writeOracle, isPending: oraclePending } = useChainWriteContract({
     contractName: "PriceOracle",
   });
 
-  const { writeContractAsync: writePool, isPending: poolPending } = useScaffoldWriteContract({
+  const { writeContractAsync: writePool, isPending: poolPending } = useChainWriteContract({
     contractName: "LendingPool",
   });
 
-  const { writeContractAsync: writeUSDC } = useScaffoldWriteContract({
+  const { writeContractAsync: writeUSDC } = useChainWriteContract({
     contractName: "MockUSDC",
   });
 
-  const { data: isPaused } = useScaffoldReadContract({
+  const { data: isPaused } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "paused",
   });
@@ -48,10 +51,10 @@ export const AdminPanel = () => {
       const ethPrice8 = BigInt(Math.round(parseFloat(ethPrice) * 1e8));
       const usdcPrice8 = BigInt(1 * 1e8); // USDC is $1
 
-      if (wethInfo?.address) {
+      if (collateralInfo?.address) {
         await writeOracle({
           functionName: "setPrice",
-          args: [wethInfo.address, ethPrice8],
+          args: [collateralInfo.address, ethPrice8],
         });
       }
       if (usdcInfo?.address) {

@@ -1,0 +1,24 @@
+[package]
+name = "xcm_liquidator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ink = { workspace = true }
+scale = { workspace = true }
+scale-info = { workspace = true }
+liquifi-traits = { path = "../../traits", default-features = false, features = ["ink-as-dependency"] }
+
+[lib]
+name = "xcm_liquidator"
+path = "lib.rs"
+
+[features]
+default = ["std"]
+std = [
+    "ink/std",
+    "scale/std",
+    "scale-info/std",
+    "liquifi-traits/std",
+]
+ink-as-dependency = []

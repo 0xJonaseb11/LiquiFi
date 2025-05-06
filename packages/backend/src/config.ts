@@ -49,4 +49,15 @@ export const config = {
     url: process.env.SUPABASE_URL || "",
     anonKey: process.env.SUPABASE_ANON_KEY || "",
   },
+  // Polkadot / Astar config
+  polkadot: {
+    rpcUrl: process.env.POLKADOT_RPC_URL || "wss://rpc.shibuya.astar.network",
+    seed: process.env.POLKADOT_SEED || "//Alice",
+    contracts: {
+      lendingPool: process.env.POLKADOT_LENDING_POOL || "",
+      priceOracle: process.env.POLKADOT_PRICE_ORACLE || "",
+      wdot: process.env.POLKADOT_WDOT || "",
+      usdc: process.env.POLKADOT_USDC || "",
+    },
+  },
 } as const;

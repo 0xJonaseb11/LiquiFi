@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useChainAccount } from "~~/hooks/useChainAccount";
 
 export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
-  const { isConnected, isConnecting, isReconnecting } = useAccount();
+  const { isConnected, isConnecting, isReconnecting } = useChainAccount();
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 

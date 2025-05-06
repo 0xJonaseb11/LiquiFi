@@ -1,9 +1,10 @@
 "use client";
 
 import { formatEther, formatUnits } from "viem";
-import { useAccount } from "wagmi";
 import { ArrowDownRightIcon, ArrowUpRightIcon, ClockIcon } from "@heroicons/react/24/outline";
-import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { useChainContext } from "~~/contexts/ChainContext";
+import { useChainAccount } from "~~/hooks/useChainAccount";
+import { useChainEventHistory } from "~~/hooks/useChainEventHistory";
 
 type HistoryEvent = {
   type: "Deposit" | "Withdraw" | "Borrow" | "Repay" | "Liquidation";
@@ -14,30 +15,31 @@ type HistoryEvent = {
 };
 
 export const UserTransactionHistory = () => {
-  const { address } = useAccount();
+  const { address } = useChainAccount();
+  const { isEvm } = useChainContext();
 
-  const { data: depositEvents, isLoading: isDepositLoading } = useScaffoldEventHistory({
+  const { data: depositEvents, isLoading: isDepositLoading } = useChainEventHistory({
     contractName: "LendingPool",
     eventName: "Deposit",
     fromBlock: 0n,
     filters: { user: address },
   });
 
-  const { data: withdrawEvents, isLoading: isWithdrawLoading } = useScaffoldEventHistory({
+  const { data: withdrawEvents, isLoading: isWithdrawLoading } = useChainEventHistory({
     contractName: "LendingPool",
     eventName: "Withdraw",
     fromBlock: 0n,
     filters: { user: address },
   });
 
-  const { data: borrowEvents, isLoading: isBorrowLoading } = useScaffoldEventHistory({
+  const { data: borrowEvents, isLoading: isBorrowLoading } = useChainEventHistory({
     contractName: "LendingPool",
     eventName: "Borrow",
     fromBlock: 0n,
     filters: { user: address },
   });
 
-  const { data: repayEvents, isLoading: isRepayLoading } = useScaffoldEventHistory({
+  const { data: repayEvents, isLoading: isRepayLoading } = useChainEventHistory({
     contractName: "LendingPool",
     eventName: "Repay",
     fromBlock: 0n,
@@ -53,7 +55,7 @@ export const UserTransactionHistory = () => {
       history.push({
         type: "Deposit",
         amount: e.args.amount || 0n,
-        asset: "WETH",
+        asset: isEvm ? "WETH" : "wDOT",
         txHash: e.transactionHash,
         blockNumber: e.blockNumber,
       });
@@ -65,7 +67,7 @@ export const UserTransactionHistory = () => {
       history.push({
         type: "Withdraw",
         amount: e.args.amount || 0n,
-        asset: "WETH",
+        asset: isEvm ? "WETH" : "wDOT",
         txHash: e.transactionHash,
         blockNumber: e.blockNumber,
       });
@@ -107,7 +109,11 @@ export const UserTransactionHistory = () => {
       </div>
     );
   } else if (history.length === 0) {
-    content = <div className="text-center p-8 opacity-40 italic text-sm">No recent transactions</div>;
+    content = (
+      <div className="text-center p-8 opacity-40 italic text-sm">
+        {isEvm ? "No recent transactions" : "Event history coming soon for Polkadot"}
+      </div>
+    );
   } else {
     content = (
       <table className="table table-sm w-full">

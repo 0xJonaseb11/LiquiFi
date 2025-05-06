@@ -2,10 +2,12 @@
 
 import { formatEther } from "viem";
 import { FireIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useChainContext } from "~~/contexts/ChainContext";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
+import { useChainReadContract, useChainWriteContract } from "~~/hooks/useChainContract";
 
 export const PositionsTable = () => {
-  const { data: borrowerCount } = useScaffoldReadContract({
+  const { data: borrowerCount } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getBorrowerCount",
   });
@@ -29,7 +31,7 @@ export const PositionsTable = () => {
           <thead>
             <tr className="bg-base-200/50">
               <th className="text-[10px] uppercase font-black tracking-wider py-4">Borrower</th>
-              <th className="text-[10px] uppercase font-black tracking-wider">Collateral (WETH)</th>
+              <th className="text-[10px] uppercase font-black tracking-wider">Collateral</th>
               <th className="text-[10px] uppercase font-black tracking-wider">Debt (USDC)</th>
               <th className="text-[10px] uppercase font-black tracking-wider">Health Factor</th>
               <th className="text-[10px] uppercase font-black tracking-wider text-right">Actions</th>
@@ -54,22 +56,22 @@ export const PositionsTable = () => {
 
 const PositionItem = ({ index }: { index: bigint }) => {
   const { data: poolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
-  const { writeContractAsync: writePool } = useScaffoldWriteContract({ contractName: "LendingPool" });
-  const { writeContractAsync: writeUSDC } = useScaffoldWriteContract({ contractName: "MockUSDC" });
+  const { writeContractAsync: writePool } = useChainWriteContract({ contractName: "LendingPool" });
+  const { writeContractAsync: writeUSDC } = useChainWriteContract({ contractName: "MockUSDC" });
 
-  const { data: borrower } = useScaffoldReadContract({
+  const { data: borrower } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getBorrowerAt",
     args: [index],
   });
 
-  const { data: position } = useScaffoldReadContract({
+  const { data: position } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getPosition",
     args: [borrower || "0x0000000000000000000000000000000000000000"],
   });
 
-  const { data: hf } = useScaffoldReadContract({
+  const { data: hf } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getHealthFactor",
     args: [borrower || "0x0000000000000000000000000000000000000000"],

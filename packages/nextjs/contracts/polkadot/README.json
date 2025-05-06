@@ -1,0 +1,11 @@
+{
+  "note": "Place ink! contract metadata JSON files here after building with cargo-contract.",
+  "files": [
+    "LendingPool.json",
+    "PriceOracle.json",
+    "InterestRateModel.json",
+    "MockWDOT.json",
+    "MockUSDC.json"
+  ],
+  "build_command": "cd packages/ink-contracts && cargo contract build --release"
+}

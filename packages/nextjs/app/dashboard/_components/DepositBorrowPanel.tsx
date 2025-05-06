@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { formatEther, parseEther, parseUnits } from "viem";
-import { useAccount } from "wagmi";
 import {
   ArrowDownCircleIcon,
   ArrowPathIcon,
@@ -11,10 +10,14 @@ import {
   CreditCardIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useChainContext } from "~~/contexts/ChainContext";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
+import { useChainAccount } from "~~/hooks/useChainAccount";
+import { useChainReadContract, useChainWriteContract } from "~~/hooks/useChainContract";
 
 export const DepositBorrowPanel = () => {
-  const { address } = useAccount();
+  const { address } = useChainAccount();
+  const { isEvm } = useChainContext();
   const [depositAmount, setDepositAmount] = useState("");
   const [borrowAmount, setBorrowAmount] = useState("");
   const [repayAmount, setRepayAmount] = useState("");
@@ -22,38 +25,38 @@ export const DepositBorrowPanel = () => {
   const [activeTab, setActiveTab] = useState<"deposit" | "borrow" | "repay" | "withdraw">("deposit");
 
   // Read user position
-  const { data: position } = useScaffoldReadContract({
+  const { data: position } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getPosition",
     args: [address || "0x0000000000000000000000000000000000000000"],
   });
 
-  const { data: healthFactor } = useScaffoldReadContract({
+  const { data: healthFactor } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getHealthFactor",
     args: [address || "0x0000000000000000000000000000000000000000"],
   });
 
   // Write hooks
-  const { writeContractAsync: writeMockWETH } = useScaffoldWriteContract({
-    contractName: "MockWETH",
+  const { writeContractAsync: writeMockCollateral } = useChainWriteContract({
+    contractName: isEvm ? "MockWETH" : "MockWDOT",
   });
 
-  const { writeContractAsync: writeMockUSDC } = useScaffoldWriteContract({
+  const { writeContractAsync: writeMockUSDC } = useChainWriteContract({
     contractName: "MockUSDC",
   });
 
-  const { writeContractAsync: writePool, isPending: poolPending } = useScaffoldWriteContract({
+  const { writeContractAsync: writePool, isPending: poolPending } = useChainWriteContract({
     contractName: "LendingPool",
   });
 
-  // Get contract info for addresses
+  // Get contract info for addresses (still using scaffold hook as it's safe for addresses)
   const { data: lendingPoolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
 
   const handleMintTokens = async () => {
     try {
       if (!address) return;
-      await writeMockWETH({
+      await writeMockCollateral({
         functionName: "mint",
         args: [address, parseEther("100")],
       });
@@ -69,7 +72,7 @@ export const DepositBorrowPanel = () => {
   const handleDeposit = async () => {
     try {
       const amount = parseEther(depositAmount);
-      await writeMockWETH({
+      await writeMockCollateral({
         functionName: "approve",
         args: [lendingPoolInfo?.address, amount],
       });
@@ -165,7 +168,7 @@ export const DepositBorrowPanel = () => {
             <span className="text-[10px] uppercase opacity-40 font-black mb-1">Collateral</span>
             <span className="font-black tracking-tighter">
               {Number.parseFloat(formatEther(position?.collateralAmount || 0n)).toFixed(3)}{" "}
-              <span className="text-[10px] opacity-40">WETH</span>
+              <span className="text-[10px] opacity-40">{isEvm ? "WETH" : "wDOT"}</span>
             </span>
           </div>
           <div className="flex flex-col border-x border-base-300 px-4">
@@ -220,7 +223,7 @@ export const DepositBorrowPanel = () => {
               }}
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2 font-black opacity-30 text-xs">
-              {activeTab === "deposit" || activeTab === "withdraw" ? "WETH" : "USDC"}
+              {activeTab === "deposit" || activeTab === "withdraw" ? (isEvm ? "WETH" : "wDOT") : "USDC"}
             </div>
           </div>
 
