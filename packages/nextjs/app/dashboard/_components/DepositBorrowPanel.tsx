@@ -141,9 +141,19 @@ export const DepositBorrowPanel = () => {
 
   const getHFColor = () => {
     if (hfDisplay === "∞" || hfNum >= 1.5) return "text-success";
-    if (hfNum >= 1.0) return "text-warning";
+    if (hfNum >= 1) return "text-warning";
     return "text-error";
   };
+
+  const inputValue = 
+    activeTab === "deposit" ? depositAmount :
+    activeTab === "borrow" ? borrowAmount :
+    activeTab === "repay" ? repayAmount : withdrawAmount;
+
+  const unitLabel = 
+    (activeTab === "deposit" || activeTab === "withdraw") 
+      ? (isEvm ? "WETH" : "wDOT") 
+      : "USDC";
 
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex flex-col h-full">
@@ -206,15 +216,7 @@ export const DepositBorrowPanel = () => {
               type="number"
               placeholder="0"
               className="w-full bg-base-200 border-none rounded-xl p-4 pr-16 font-black text-2xl focus:ring-1 focus:ring-primary/30 transition-all outline-none"
-              value={
-                activeTab === "deposit"
-                  ? depositAmount
-                  : activeTab === "borrow"
-                    ? borrowAmount
-                    : activeTab === "repay"
-                      ? repayAmount
-                      : withdrawAmount
-              }
+              value={inputValue}
               onChange={e => {
                 if (activeTab === "deposit") setDepositAmount(e.target.value);
                 else if (activeTab === "borrow") setBorrowAmount(e.target.value);
@@ -223,7 +225,7 @@ export const DepositBorrowPanel = () => {
               }}
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2 font-black opacity-30 text-xs">
-              {activeTab === "deposit" || activeTab === "withdraw" ? (isEvm ? "WETH" : "wDOT") : "USDC"}
+              {unitLabel}
             </div>
           </div>
 

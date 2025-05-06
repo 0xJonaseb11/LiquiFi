@@ -68,7 +68,7 @@ export const useChainReadContract = (params: { contractName: string; functionNam
   }, [isEvm, isReady, params.contractName, params.functionName, JSON.stringify(params.args)]); // eslint-disable-line
 
   if (isEvm) {
-    return evmResult;
+    return evmResult as any;
   }
 
   return {
@@ -76,7 +76,7 @@ export const useChainReadContract = (params: { contractName: string; functionNam
     isLoading: polkadotLoading,
     error: polkadotError,
     refetch: () => {},
-  };
+  } as any;
 };
 
 /**
@@ -143,11 +143,11 @@ export const useChainWriteContract = (params: { contractName: string }) => {
   );
 
   if (isEvm) {
-    return evmResult;
+    return evmResult as any;
   }
 
   return {
     writeContractAsync: writeAsync,
     isPending,
-  };
+  } as any;
 };

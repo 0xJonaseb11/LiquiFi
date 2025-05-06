@@ -5,10 +5,14 @@
   "scripts": {
     "dev": "ts-node src/index.ts",
     "build": "tsc",
-    "lint": "eslint src --ext .ts",
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@polkadot/api": "^16.5.6",
+    "@polkadot/api-contract": "^16.5.6",
+    "@polkadot/keyring": "^14.0.3",
+    "@polkadot/util": "^14.0.3",
+    "@polkadot/util-crypto": "^14.0.3",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.2",
     "node-fetch": "^3.3.2",
@@ -18,9 +22,6 @@
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^8.59.2",
-    "@typescript-eslint/parser": "^8.59.2",
-    "eslint": "^10.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }

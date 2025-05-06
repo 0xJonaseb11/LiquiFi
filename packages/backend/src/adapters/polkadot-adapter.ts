@@ -25,9 +25,13 @@ export class PolkadotAdapter implements ChainAdapter {
 
   async connect(): Promise<void> {
     // Dynamic imports
-    const polkadotApi = await import("@polkadot/api");
-    const polkadotContract = await import("@polkadot/api-contract");
-    const polkadotKeyring = await import("@polkadot/keyring");
+    const apiMod = "@polkadot/api";
+    const contractMod = "@polkadot/api-contract";
+    const keyringMod = "@polkadot/keyring";
+
+    const polkadotApi = await (import(apiMod) as any);
+    const polkadotContract = await (import(contractMod) as any);
+    const polkadotKeyring = await (import(keyringMod) as any);
 
     ApiPromise = polkadotApi.ApiPromise;
     WsProvider = polkadotApi.WsProvider;
