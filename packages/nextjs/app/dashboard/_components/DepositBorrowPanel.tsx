@@ -22,7 +22,7 @@ export const DepositBorrowPanel = () => {
   const [borrowAmount, setBorrowAmount] = useState("");
   const [repayAmount, setRepayAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [activeTab, setActiveTab] = useState<"deposit" | "borrow" | "repay" | "withdraw">("deposit");
+  const [activeTab, setActiveTab] = useState<"supply" | "borrow" | "repay" | "withdraw">("supply");
   const { data: position } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getPosition",
@@ -128,15 +128,22 @@ export const DepositBorrowPanel = () => {
     if (hfNum >= 1) return "text-warning";
     return "text-error";
   };
-  const inputValue =
-    activeTab === "deposit"
-      ? depositAmount
-      : activeTab === "borrow"
-        ? borrowAmount
-        : activeTab === "repay"
-          ? repayAmount
-          : withdrawAmount;
-  const unitLabel = activeTab === "deposit" || activeTab === "withdraw" ? (isEvm ? "WETH" : "wDOT") : "USDC";
+  const getActiveTabState = () => {
+    switch (activeTab) {
+      case "supply":
+        return { value: depositAmount, unit: isEvm ? "WETH" : "wDOT", label: "Supply Assets" };
+      case "borrow":
+        return { value: borrowAmount, unit: "USDC", label: "Borrow Funds" };
+      case "repay":
+        return { value: repayAmount, unit: "USDC", label: "Repay Debt" };
+      case "withdraw":
+        return { value: withdrawAmount, unit: isEvm ? "WETH" : "wDOT", label: "Withdraw Assets" };
+      default:
+        return { value: "", unit: "", label: "" };
+    }
+  };
+
+  const { value: inputValue, unit: unitLabel, label: buttonLabel } = getActiveTabState();
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex flex-col h-full">
       <div className="p-4 border-b border-base-300 flex items-center justify-between bg-base-200/30">
@@ -156,27 +163,27 @@ export const DepositBorrowPanel = () => {
         {}
         <div className="grid grid-cols-3 gap-4 mb-8 bg-base-200/50 p-4 rounded-xl border border-base-300/50">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase opacity-40 font-black mb-1">Collateral</span>
+            <span className="text-[10px] uppercase opacity-40 font-black mb-1">Backing Assets</span>
             <span className="font-black tracking-tighter">
               {Number.parseFloat(formatEther(position?.collateralAmount || 0n)).toFixed(3)}{" "}
               <span className="text-[10px] opacity-40">{isEvm ? "WETH" : "wDOT"}</span>
             </span>
           </div>
           <div className="flex flex-col border-x border-base-300 px-4">
-            <span className="text-[10px] uppercase opacity-40 font-black mb-1">Debt</span>
+            <span className="text-[10px] uppercase opacity-40 font-black mb-1">Active Borrowing</span>
             <span className="font-black tracking-tighter">
               {Number.parseFloat(formatEther(position?.debtAmount || 0n)).toFixed(2)}{" "}
               <span className="text-[10px] opacity-40">USDC</span>
             </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-[10px] uppercase opacity-40 font-black mb-1">Health</span>
+            <span className="text-[10px] uppercase opacity-40 font-black mb-1">Safety Score</span>
             <span className={`font-black tracking-tighter ${getHFColor()}`}>{hfDisplay}</span>
           </div>
         </div>
         {}
         <div className="flex gap-1 p-1 bg-base-200 rounded-lg mb-6">
-          {(["deposit", "borrow", "repay", "withdraw"] as const).map(tab => (
+          {(["supply", "borrow", "repay", "withdraw"] as const).map(tab => (
             <button
               key={tab}
               className={`flex-1 py-1.5 text-[10px] uppercase font-black rounded-md transition-all ${
@@ -197,7 +204,7 @@ export const DepositBorrowPanel = () => {
               className="w-full bg-base-200 border-none rounded-xl p-4 pr-16 font-black text-2xl focus:ring-1 focus:ring-primary/30 transition-all outline-none"
               value={inputValue}
               onChange={e => {
-                if (activeTab === "deposit") setDepositAmount(e.target.value);
+                if (activeTab === "supply") setDepositAmount(e.target.value);
                 else if (activeTab === "borrow") setBorrowAmount(e.target.value);
                 else if (activeTab === "repay") setRepayAmount(e.target.value);
                 else setWithdrawAmount(e.target.value);
@@ -208,7 +215,7 @@ export const DepositBorrowPanel = () => {
           <button
             className="w-full py-4 rounded-xl premium-gradient text-white font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50"
             onClick={() => {
-              if (activeTab === "deposit") handleDeposit();
+              if (activeTab === "supply") handleDeposit();
               else if (activeTab === "borrow") handleBorrow();
               else if (activeTab === "repay") handleRepay();
               else handleWithdraw();
@@ -219,11 +226,11 @@ export const DepositBorrowPanel = () => {
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                {activeTab === "deposit" && <ArrowDownCircleIcon className="w-5 h-5" />}
+                {activeTab === "supply" && <ArrowDownCircleIcon className="w-5 h-5" />}
                 {activeTab === "borrow" && <ArrowUpCircleIcon className="w-5 h-5" />}
                 {activeTab === "repay" && <ArrowPathIcon className="w-5 h-5" />}
                 {activeTab === "withdraw" && <ArrowUpCircleIcon className="w-5 h-5" />}
-                {activeTab} funds
+                {buttonLabel}
               </>
             )}
           </button>

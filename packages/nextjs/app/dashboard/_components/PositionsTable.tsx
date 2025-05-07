@@ -2,7 +2,6 @@
 
 import { formatEther } from "viem";
 import { FireIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { useChainContext } from "~~/contexts/ChainContext";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { useChainReadContract, useChainWriteContract } from "~~/hooks/useChainContract";
 
@@ -28,11 +27,11 @@ export const PositionsTable = () => {
         <table className="table table-zebra table-sm">
           <thead>
             <tr className="bg-base-200/50">
-              <th className="text-[10px] uppercase font-black tracking-wider py-4">Borrower</th>
-              <th className="text-[10px] uppercase font-black tracking-wider">Collateral</th>
-              <th className="text-[10px] uppercase font-black tracking-wider">Debt (USDC)</th>
-              <th className="text-[10px] uppercase font-black tracking-wider">Health Factor</th>
-              <th className="text-[10px] uppercase font-black tracking-wider text-right">Actions</th>
+              <th className="text-[10px] uppercase font-black tracking-wider py-4">Account</th>
+              <th className="text-[10px] uppercase font-black tracking-wider">Supplied Assets</th>
+              <th className="text-[10px] uppercase font-black tracking-wider">Active Debt</th>
+              <th className="text-[10px] uppercase font-black tracking-wider">Safety Score</th>
+              <th className="text-[10px] uppercase font-black tracking-wider text-right">Liquidation</th>
             </tr>
           </thead>
           <tbody>

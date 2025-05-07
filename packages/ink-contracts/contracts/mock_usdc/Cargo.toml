@@ -7,7 +7,6 @@ edition = "2021"
 ink = { workspace = true }
 scale = { workspace = true }
 scale-info = { workspace = true }
-pendzl = { workspace = true, features = ["psp22"] }
 liquifi-traits = { path = "../../traits", default-features = false, features = ["ink-as-dependency"] }
 
 [dev-dependencies]
@@ -23,7 +22,6 @@ std = [
     "ink/std",
     "scale/std",
     "scale-info/std",
-    "pendzl/std",
     "liquifi-traits/std",
 ]
 ink-as-dependency = []

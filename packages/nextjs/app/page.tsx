@@ -17,7 +17,7 @@ const Home: NextPage = () => {
       <div className="relative flex-grow flex items-center justify-center py-24 px-4 overflow-hidden border-b border-base-300">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)]" />
         <div className="max-w-4xl text-center z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest mb-8">
             <CpuChipIcon className="w-3.5 h-3.5" />
             Autonomous AI Liquidation Protocol
           </div>
@@ -25,8 +25,8 @@ const Home: NextPage = () => {
             Liqui<span className="text-primary not-italic">Fi</span>
           </h1>
           <p className="text-lg md:text-xl opacity-60 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
-            The next generation of lending. Protected by real-time AI risk assessment and cross-chain liquidation nodes
-            via LayerZero.
+            Unlock the power of cross-chain liquidity. Supply assets on Polkadot or EVM and borrow USDC with real-time
+            protection from our advanced AI risk engine.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -87,11 +87,12 @@ const Home: NextPage = () => {
               </div>
               <div>
                 <h4 className="font-black text-lg uppercase tracking-tight">Hardened Core</h4>
-                <p className="text-xs opacity-40 uppercase tracking-widest font-bold">OpenZeppelin Auditable Logic</p>
+                <p className="text-xs opacity-40 uppercase tracking-widest font-bold">Industry-Standard Security</p>
               </div>
             </div>
             <div className="flex gap-12 opacity-20 grayscale font-black text-2xl italic uppercase tracking-tighter">
               <span>WETH</span>
+              <span>WDOT</span>
               <span>USDC</span>
               <span>Chainlink</span>
               <span>LZ</span>

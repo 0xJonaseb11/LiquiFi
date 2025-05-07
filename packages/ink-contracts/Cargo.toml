@@ -18,8 +18,11 @@ pendzl = { version = "1.0.2", default-features = false }
 
 [profile.release]
 codegen-units = 1
-lto = true
+lto = false
 opt-level = "z"
 overflow-checks = false
 panic = "abort"
 strip = "symbols"
+
+[patch.crates-io]
+rlibc = { path = "local-crates/rlibc" }

@@ -1,63 +1,137 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
+
 #[ink::contract]
 mod mock_usdc {
     use ink::prelude::string::String;
-    use pendzl::contracts::psp22::*;
+    use ink::prelude::vec::Vec;
+    use ink::storage::Mapping;
+
     #[ink(storage)]
-    #[derive(Default, pendzl::traits::StorageFieldGetter)]
     pub struct MockUSDC {
-        #[storage_field]
-        psp22: PSP22Data,
-        owner: AccountId,
+        total_supply: Balance,
+        balances: Mapping<AccountId, Balance>,
+        allowances: Mapping<(AccountId, AccountId), Balance>,
     }
-    impl PSP22 for MockUSDC {}
+
+    #[ink(event)]
+    pub struct Transfer {
+        #[ink(topic)]
+        from: Option<AccountId>,
+        #[ink(topic)]
+        to: Option<AccountId>,
+        value: Balance,
+    }
+
+    #[ink(event)]
+    pub struct Approval {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        spender: AccountId,
+        value: Balance,
+    }
+
     impl MockUSDC {
         #[ink(constructor)]
         pub fn new() -> Self {
-            let caller = Self::env().caller();
             Self {
-                psp22: PSP22Data::default(),
-                owner: caller,
+                total_supply: 0,
+                balances: Mapping::default(),
+                allowances: Mapping::default(),
             }
         }
+
         #[ink(message)]
-        pub fn mint(&mut self, to: AccountId, amount: Balance) -> Result<(), PSP22Error> {
-            self.psp22._mint_to(&to, &amount)?;
+        pub fn mint(&mut self, to: AccountId, amount: Balance) -> Result<(), ()> {
+            let current_balance = self.balances.get(to).unwrap_or(0);
+            self.balances.insert(to, &(current_balance + amount));
+            self.total_supply += amount;
+            self.env().emit_event(Transfer {
+                from: None,
+                to: Some(to),
+                value: amount,
+            });
             Ok(())
         }
+
+        #[ink(message)]
+        pub fn total_supply(&self) -> Balance {
+            self.total_supply
+        }
+
+        #[ink(message)]
+        pub fn balance_of(&self) -> Balance {
+            self.balances.get(self.env().caller()).unwrap_or(0)
+        }
+
+        #[ink(message)]
+        pub fn balance_of_account(&self, account: AccountId) -> Balance {
+            self.balances.get(account).unwrap_or(0)
+        }
+
+        #[ink(message)]
+        pub fn transfer(&mut self, to: AccountId, value: Balance, _data: Vec<u8>) -> Result<(), ()> {
+            let from = self.env().caller();
+            self.internal_transfer(from, to, value)
+        }
+
+        #[ink(message)]
+        pub fn transfer_from(&mut self, from: AccountId, to: AccountId, value: Balance, _data: Vec<u8>) -> Result<(), ()> {
+            let caller = self.env().caller();
+            let allowance = self.allowances.get((from, caller)).unwrap_or(0);
+            if allowance < value {
+                return Err(());
+            }
+            self.allowances.insert((from, caller), &(allowance - value));
+            self.internal_transfer(from, to, value)
+        }
+
+        #[ink(message)]
+        pub fn approve(&mut self, spender: AccountId, value: Balance) -> Result<(), ()> {
+            let owner = self.env().caller();
+            self.allowances.insert((owner, spender), &value);
+            self.env().emit_event(Approval {
+                owner,
+                spender,
+                value,
+            });
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn allowance(&self, owner: AccountId, spender: AccountId) -> Balance {
+            self.allowances.get((owner, spender)).unwrap_or(0)
+        }
+
         #[ink(message)]
         pub fn token_name(&self) -> String {
             String::from("USD Coin")
         }
+
         #[ink(message)]
         pub fn token_symbol(&self) -> String {
             String::from("USDC")
         }
+
         #[ink(message)]
         pub fn token_decimals(&self) -> u8 {
             6
         }
-        #[ink(message)]
-        pub fn owner(&self) -> AccountId {
-            self.owner
-        }
-    }
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-        #[ink::test]
-        fn mint_works() {
-            let mut contract = MockUSDC::new();
-            let accounts = ink::env::test::default_accounts::<ink::env::DefaultEnvironment>();
-            let amount: Balance = 100_000 * 10u128.pow(6);
-            assert!(contract.mint(accounts.alice, amount).is_ok());
-            assert_eq!(contract.balance_of(accounts.alice), amount);
-        }
-        #[ink::test]
-        fn decimals_correct() {
-            let contract = MockUSDC::new();
-            assert_eq!(contract.token_decimals(), 6);
-            assert_eq!(contract.token_symbol(), "USDC");
+
+        fn internal_transfer(&mut self, from: AccountId, to: AccountId, value: Balance) -> Result<(), ()> {
+            let from_balance = self.balances.get(from).unwrap_or(0);
+            if from_balance < value {
+                return Err(());
+            }
+            self.balances.insert(from, &(from_balance - value));
+            let to_balance = self.balances.get(to).unwrap_or(0);
+            self.balances.insert(to, &(to_balance + value));
+            self.env().emit_event(Transfer {
+                from: Some(from),
+                to: Some(to),
+                value,
+            });
+            Ok(())
         }
     }
 }

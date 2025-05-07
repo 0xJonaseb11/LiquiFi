@@ -1,7 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract, Signer } from "ethers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { Signer } from "ethers";
+import { MockWETH, MockUSDC, PriceOracle, InterestRateModel, LendingPool } from "../typechain-types";
 
 describe("LiquiFi Lending Protocol", function () {
   let deployer: Signer;
@@ -11,15 +12,15 @@ describe("LiquiFi Lending Protocol", function () {
   let borrowerAddr: string;
   let liquidatorAddr: string;
 
-  let weth: Contract;
-  let usdc: Contract;
-  let oracle: Contract;
-  let interestModel: Contract;
-  let lendingPool: Contract;
+  let weth: MockWETH;
+  let usdc: MockUSDC;
+  let oracle: PriceOracle;
+  let interestModel: InterestRateModel;
+  let lendingPool: LendingPool;
 
   // Constants
-  const ETH_PRICE = 2000_00000000n; // $2,000 (8 dec)
-  const USDC_PRICE = 1_00000000n; // $1.00 (8 dec)
+  const ETH_PRICE = 2000_0000_0000n; // $2,000 (8 dec)
+  const USDC_PRICE = 1_0000_0000n; // $1.00 (8 dec)
   const PRECISION = ethers.parseEther("1");
 
   beforeEach(async function () {
@@ -30,20 +31,20 @@ describe("LiquiFi Lending Protocol", function () {
 
     // Deploy mock tokens
     const MockWETH = await ethers.getContractFactory("MockWETH");
-    weth = await MockWETH.deploy();
+    weth = (await MockWETH.deploy()) as MockWETH;
 
     const MockUSDC = await ethers.getContractFactory("MockUSDC");
-    usdc = await MockUSDC.deploy();
+    usdc = (await MockUSDC.deploy()) as MockUSDC;
 
     // Deploy PriceOracle via proxy
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
     const oracleImpl = await PriceOracle.deploy();
     const oracleInitData = oracleImpl.interface.encodeFunctionData("initialize", [deployerAddr]);
-    const Proxy = await ethers.getContractFactory(
+    const proxyFactory = await ethers.getContractFactory(
       "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy",
     );
-    const oracleProxy = await Proxy.deploy(await oracleImpl.getAddress(), oracleInitData);
-    oracle = PriceOracle.attach(await oracleProxy.getAddress());
+    const oracleProxy = await proxyFactory.deploy(await oracleImpl.getAddress(), oracleInitData);
+    oracle = PriceOracle.attach(await oracleProxy.getAddress()) as PriceOracle;
 
     // Deploy InterestRateModel via proxy
     const InterestRateModel = await ethers.getContractFactory("InterestRateModel");
@@ -56,8 +57,8 @@ describe("LiquiFi Lending Protocol", function () {
       ethers.parseEther("0.10"), // 10% reserve
       deployerAddr,
     ]);
-    const irmProxy = await Proxy.deploy(await irmImpl.getAddress(), irmInitData);
-    interestModel = InterestRateModel.attach(await irmProxy.getAddress());
+    const irmProxy = await proxyFactory.deploy(await irmImpl.getAddress(), irmInitData);
+    interestModel = InterestRateModel.attach(await irmProxy.getAddress()) as InterestRateModel;
 
     // Deploy LendingPool via proxy
     const LendingPool = await ethers.getContractFactory("LendingPool");
@@ -72,8 +73,8 @@ describe("LiquiFi Lending Protocol", function () {
       ethers.parseEther("0.05"), // 5% liquidation incentive
       deployerAddr,
     ]);
-    const poolProxy = await Proxy.deploy(await poolImpl.getAddress(), poolInitData);
-    lendingPool = LendingPool.attach(await poolProxy.getAddress());
+    const poolProxy = await proxyFactory.deploy(await poolImpl.getAddress(), poolInitData);
+    lendingPool = LendingPool.attach(await poolProxy.getAddress()) as LendingPool;
 
     // Set oracle prices
     await oracle.setPrice(await weth.getAddress(), ETH_PRICE);
@@ -81,12 +82,12 @@ describe("LiquiFi Lending Protocol", function () {
 
     // Mint tokens
     await weth.mint(borrowerAddr, ethers.parseEther("100")); // 100 WETH
-    await usdc.mint(deployerAddr, 10_000_000_000000n); // 10M USDC
-    await usdc.mint(liquidatorAddr, 1_000_000_000000n); // 1M USDC
+    await usdc.mint(deployerAddr, 10_000_000_000_000n); // 10M USDC
+    await usdc.mint(liquidatorAddr, 1_000_000_000_000n); // 1M USDC
 
     // Seed pool with USDC liquidity
-    await usdc.connect(deployer).approve(await lendingPool.getAddress(), 5_000_000_000000n);
-    await lendingPool.connect(deployer).seedLiquidity(5_000_000_000000n);
+    await usdc.connect(deployer).approve(await lendingPool.getAddress(), 5_000_000_000_000n);
+    await lendingPool.connect(deployer).seedLiquidity(5_000_000_000_000n);
   });
 
   // ──────────────────────────────────────────────
@@ -124,7 +125,7 @@ describe("LiquiFi Lending Protocol", function () {
 
     it("should revert withdrawal that would breach LTV", async function () {
       // Borrow first
-      await lendingPool.connect(borrower).borrow(10_000_000000n); // 10k USDC
+      await lendingPool.connect(borrower).borrow(10_000_000_000n); // 10k USDC
       // Try to withdraw too much collateral
       await expect(lendingPool.connect(borrower).withdraw(ethers.parseEther("9"))).to.be.revertedWithCustomError(
         lendingPool,
@@ -146,7 +147,7 @@ describe("LiquiFi Lending Protocol", function () {
 
     it("should borrow within LTV", async function () {
       // 10 WETH * $2000 * 75% LTV = $15,000 max borrow
-      const borrowAmount = 14_000_000000n; // 14k USDC (within limit)
+      const borrowAmount = 14_000_000_000n; // 14k USDC (within limit)
       await lendingPool.connect(borrower).borrow(borrowAmount);
 
       const pos = await lendingPool.getPosition(borrowerAddr);
@@ -155,7 +156,7 @@ describe("LiquiFi Lending Protocol", function () {
 
     it("should revert borrow exceeding LTV", async function () {
       // 10 WETH * $2000 * 75% = $15,000 max → try $16,000
-      const borrowAmount = 16_000_000000n;
+      const borrowAmount = 16_000_000_000n;
       await expect(lendingPool.connect(borrower).borrow(borrowAmount)).to.be.revertedWithCustomError(
         lendingPool,
         "BorrowExceedsLTV",
@@ -163,7 +164,7 @@ describe("LiquiFi Lending Protocol", function () {
     });
 
     it("should track health factor correctly", async function () {
-      await lendingPool.connect(borrower).borrow(10_000_000000n);
+      await lendingPool.connect(borrower).borrow(10_000_000_000n);
       const hf = await lendingPool.getHealthFactor(borrowerAddr);
       // HF = (10 * 2000 * 0.75) / (10000 * 1) = 15000/10000 = 1.5
       expect(hf).to.be.closeTo(ethers.parseEther("1.5"), ethers.parseEther("0.01"));
@@ -174,15 +175,15 @@ describe("LiquiFi Lending Protocol", function () {
     beforeEach(async function () {
       await weth.connect(borrower).approve(await lendingPool.getAddress(), ethers.parseEther("10"));
       await lendingPool.connect(borrower).deposit(ethers.parseEther("10"));
-      await lendingPool.connect(borrower).borrow(10_000_000000n);
+      await lendingPool.connect(borrower).borrow(10_000_000_000n);
       // Give borrower USDC to repay
-      await usdc.mint(borrowerAddr, 20_000_000000n);
+      await usdc.mint(borrowerAddr, 20_000_000_000n);
     });
 
     it("should repay debt fully", async function () {
       // Approve and repay enough to cover principal + accrued interest
       // The contract will cap the repayment to the actual debt amount
-      const repayAmount = 11_000_000000n;
+      const repayAmount = 11_000_000_000n;
       await usdc.connect(borrower).approve(await lendingPool.getAddress(), repayAmount);
       await lendingPool.connect(borrower).repay(repayAmount);
 
@@ -200,26 +201,26 @@ describe("LiquiFi Lending Protocol", function () {
       // Setup: borrower deposits 10 WETH, borrows 14k USDC (near max LTV)
       await weth.connect(borrower).approve(await lendingPool.getAddress(), ethers.parseEther("10"));
       await lendingPool.connect(borrower).deposit(ethers.parseEther("10"));
-      await lendingPool.connect(borrower).borrow(14_000_000000n);
+      await lendingPool.connect(borrower).borrow(14_000_000_000n);
     });
 
     it("should revert liquidation on healthy position", async function () {
-      await usdc.connect(liquidator).approve(await lendingPool.getAddress(), 7_000_000000n);
+      await usdc.connect(liquidator).approve(await lendingPool.getAddress(), 7_000_000_000n);
       await expect(
-        lendingPool.connect(liquidator).liquidate(borrowerAddr, 7_000_000000n),
+        lendingPool.connect(liquidator).liquidate(borrowerAddr, 7_000_000_000n),
       ).to.be.revertedWithCustomError(lendingPool, "PositionHealthy");
     });
 
     it("should liquidate after price drop makes HF < 1", async function () {
       // Drop ETH price from $2000 to $1500
       // New HF = (10 * 1500 * 0.75) / (14000 * 1) = 11250/14000 ≈ 0.803
-      await oracle.setPrice(await weth.getAddress(), 1500_00000000n);
+      await oracle.setPrice(await weth.getAddress(), 1500_0000_0000n);
 
       const hfBefore = await lendingPool.getHealthFactor(borrowerAddr);
       expect(hfBefore).to.be.lt(PRECISION); // HF < 1.0
 
       // Liquidator repays 50% of debt (close factor)
-      const repayAmount = 7_000_000000n;
+      const repayAmount = 7_000_000_000n;
       await usdc.connect(liquidator).approve(await lendingPool.getAddress(), repayAmount);
 
       await expect(lendingPool.connect(liquidator).liquidate(borrowerAddr, repayAmount)).to.emit(
@@ -233,10 +234,10 @@ describe("LiquiFi Lending Protocol", function () {
     });
 
     it("should enforce close factor limit", async function () {
-      await oracle.setPrice(await weth.getAddress(), 1500_00000000n);
+      await oracle.setPrice(await weth.getAddress(), 1500_0000_0000n);
 
       // Try to repay more than close factor allows (50% of 14k = 7k max)
-      const repayAmount = 10_000_000000n; // Over the 7k limit
+      const repayAmount = 10_000_000_000n; // Over the 7k limit
       await usdc.connect(liquidator).approve(await lendingPool.getAddress(), repayAmount);
 
       await expect(lendingPool.connect(liquidator).liquidate(borrowerAddr, repayAmount)).to.be.revertedWithCustomError(
@@ -246,9 +247,9 @@ describe("LiquiFi Lending Protocol", function () {
     });
 
     it("should prevent self-liquidation", async function () {
-      await oracle.setPrice(await weth.getAddress(), 1500_00000000n);
-      await usdc.mint(borrowerAddr, 7_000_000000n);
-      await usdc.connect(borrower).approve(await lendingPool.getAddress(), 7_000_000000n);
+      await oracle.setPrice(await weth.getAddress(), 1500_0000_0000n);
+      await usdc.mint(borrowerAddr, 7_000_000_000n);
+      await usdc.connect(borrower).approve(await lendingPool.getAddress(), 7_000_000_000n);
 
       await expect(lendingPool.connect(borrower).liquidate(borrowerAddr, 7_000_000000n)).to.be.revertedWithCustomError(
         lendingPool,
@@ -265,21 +266,17 @@ describe("LiquiFi Lending Protocol", function () {
     it("should accrue interest over time", async function () {
       await weth.connect(borrower).approve(await lendingPool.getAddress(), ethers.parseEther("10"));
       await lendingPool.connect(borrower).deposit(ethers.parseEther("10"));
-      await lendingPool.connect(borrower).borrow(10_000_000000n);
+      await lendingPool.connect(borrower).borrow(10_000_000_000n);
 
-      const posBefore = await lendingPool.getPosition(borrowerAddr);
 
       // Advance 30 days
       await time.increase(30 * 24 * 60 * 60);
 
       // Trigger interest accrual via a no-op interaction
-      await usdc.mint(borrowerAddr, 1_000000n);
-      await usdc.connect(borrower).approve(await lendingPool.getAddress(), 1_000000n);
-      await lendingPool.connect(borrower).repay(1_000000n);
+      await usdc.mint(borrowerAddr, 1_000_000n);
+      await usdc.connect(borrower).approve(await lendingPool.getAddress(), 1_000_000n);
+      await lendingPool.connect(borrower).repay(1_000_000n);
 
-      const posAfter = await lendingPool.getPosition(borrowerAddr);
-      // Debt should be higher due to interest (minus the 1 USDC repaid)
-      const debtBeforeMinusRepay = posBefore.debtAmount - ethers.parseEther("0.000001") * 10n ** 12n;
       // Just check totalBorrows increased
       expect(await lendingPool.getBorrowIndex()).to.be.gt(PRECISION);
     });
@@ -325,7 +322,7 @@ describe("LiquiFi Lending Protocol", function () {
 
     it("should batch set prices", async function () {
       const assets = [await weth.getAddress(), await usdc.getAddress()];
-      const prices = [3000_00000000n, 1_00000000n];
+      const prices = [3000_0000_0000n, 1_0000_0000n];
       await oracle.setPrices(assets, prices);
 
       expect(await oracle.getPrice(assets[0])).to.equal(prices[0]);

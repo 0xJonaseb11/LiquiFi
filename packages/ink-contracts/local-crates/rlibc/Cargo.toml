@@ -1,0 +1,9 @@
+[package]
+name = "rlibc"
+version = "1.0.0"
+edition = "2021"
+description = "Local shim for deprecated rlibc crate"
+
+[lib]
+name = "rlibc"
+path = "src/lib.rs"

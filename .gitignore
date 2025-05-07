@@ -29,3 +29,5 @@ dist
 INTERVIEW_PREP.md
 AGENTS.md
 CLAUDE.md
+.env
+.env.local

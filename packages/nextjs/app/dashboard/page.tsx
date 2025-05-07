@@ -23,10 +23,10 @@ const Dashboard = () => {
             </div>
             <div>
               <h1 className="text-4xl font-black tracking-tighter uppercase italic leading-none mb-1">
-                Command Center
+                Protocol Overview
               </h1>
               <p className="text-[10px] uppercase tracking-[0.3em] font-black opacity-30">
-                Real-time Liquidity Orchestration
+                Global Liquidity & Position Safety
               </p>
             </div>
           </div>

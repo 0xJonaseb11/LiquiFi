@@ -215,7 +215,7 @@ export const AdminPanel = () => {
               value={newLtv}
               onChange={e => setNewLtv(e.target.value)}
             />
-            <button className="btn btn-neutral btn-sm rounded-lg" onClick={handleSetLTV} disabled={poolPending}>
+            <button className="btn btn-primary btn-sm rounded-lg" onClick={handleSetLTV} disabled={poolPending}>
               Config
             </button>
           </div>
@@ -235,7 +235,7 @@ export const AdminPanel = () => {
               onChange={e => setSeedAmount(e.target.value)}
               placeholder="Amount (USDC)"
             />
-            <button className="btn btn-accent btn-sm rounded-lg" onClick={handleSeedLiquidity} disabled={poolPending}>
+            <button className="btn btn-primary btn-sm rounded-lg" onClick={handleSeedLiquidity} disabled={poolPending}>
               Seed
             </button>
           </div>
@@ -271,7 +271,7 @@ export const AdminPanel = () => {
               </div>
             </div>
             <button
-              className="btn btn-neutral btn-block btn-sm rounded-lg"
+              className="btn btn-primary btn-block btn-sm rounded-lg"
               onClick={handleSetLiquidationParams}
               disabled={poolPending}
             >

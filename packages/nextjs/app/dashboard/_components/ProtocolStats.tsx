@@ -35,30 +35,30 @@ export const ProtocolStats = () => {
   });
   const stats = [
     {
-      label: "Total TVL",
+      label: "Value Locked",
       value: totalDeposits
         ? `${Number.parseFloat(formatEther(totalDeposits)).toFixed(2)} ${isEvm ? "WETH" : "wDOT"}`
-        : "—",
+        : "0.00",
       icon: <BanknotesIcon className="w-4 h-4" />,
       color: "text-success",
     },
     {
-      label: "Total Debt",
-      value: totalBorrows ? `${Number.parseFloat(formatEther(totalBorrows)).toFixed(2)} USDC` : "—",
+      label: "Total Borrowed",
+      value: totalBorrows ? `${Number.parseFloat(formatEther(totalBorrows)).toFixed(2)} USDC` : "0.00",
       icon: <ArrowUpRightIcon className="w-4 h-4" />,
       color: "text-warning",
     },
     {
-      label: "Utilization",
-      value: utilizationRate ? `${(Number.parseFloat(formatEther(utilizationRate)) * 100).toFixed(1)}%` : "—",
+      label: "Pool Utilization",
+      value: utilizationRate ? `${(Number.parseFloat(formatEther(utilizationRate)) * 100).toFixed(1)}%` : "0.0%",
       icon: <ChartPieIcon className="w-4 h-4" />,
       color: "text-info",
     },
     {
-      label: "Current APR",
+      label: "Borrowing APR",
       value: borrowRate
         ? `${(Number.parseFloat(formatEther(borrowRate)) * 365.25 * 24 * 3600 * 100).toFixed(2)}%`
-        : "—",
+        : "0.00%",
       icon: <PresentationChartLineIcon className="w-4 h-4" />,
       color: "text-primary",
     },

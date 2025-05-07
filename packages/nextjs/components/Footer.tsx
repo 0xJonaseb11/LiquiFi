@@ -46,21 +46,28 @@ export const Footer = () => {
       </div>
       <div className="w-full">
         <ul className="menu menu-horizontal w-full">
-          <div className="flex justify-center items-center gap-2 text-sm w-full">
-            <div className="text-center">
-              <a
-                href="https://github.com/0xJonaseb11/LiquiFi"
-                target="_blank"
-                rel="noreferrer"
-                className="link opacity-50 hover:opacity-100 transition-opacity"
-              >
-                GitHub Repository
-              </a>
-            </div>
-            <span>·</span>
-            <div className="flex justify-center items-center gap-1">
-              <span className="opacity-50">Powered by</span>
-              <span className="font-bold">LiquiFi AI Engine</span>
+          <div className="flex justify-center items-center gap-6 text-[10px] uppercase font-black tracking-widest w-full">
+            <Link href="/docs" className="hover:text-primary transition-colors">
+              Documentation
+            </Link>
+            <Link href="/governance" className="hover:text-primary transition-colors">
+              Governance
+            </Link>
+            <Link href="/security" className="hover:text-primary transition-colors">
+              Security
+            </Link>
+            <a
+              href="https://github.com/0xJonaseb11/LiquiFi"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-primary transition-colors"
+            >
+              GitHub
+            </a>
+            <span className="opacity-20 mx-2">|</span>
+            <div className="flex items-center gap-2">
+              <span className="opacity-40">Secured by</span>
+              <span className="text-primary">LiquiFi AI Core</span>
             </div>
           </div>
         </ul>
