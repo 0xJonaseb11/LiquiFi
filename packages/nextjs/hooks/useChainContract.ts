@@ -13,19 +13,14 @@ import { usePolkadotContext } from "~~/providers/PolkadotProvider";
  */
 export const useChainReadContract = (params: { contractName: string; functionName: string; args?: any[] }) => {
   const { isEvm } = useChainContext();
-
-  // EVM path
   const evmResult = useScaffoldReadContract({
     contractName: params.contractName as any,
     functionName: params.functionName as any,
     args: params.args as any,
   } as any);
-
-  // Polkadot path
   const [polkadotData, setPolkadotData] = useState<any>(null);
   const [polkadotLoading, setPolkadotLoading] = useState(false);
   const [polkadotError, setPolkadotError] = useState<string | null>(null);
-
   let contracts: Record<string, any> = {};
   let isReady = false;
   let selectedAccount: any = null;
@@ -35,20 +30,15 @@ export const useChainReadContract = (params: { contractName: string; functionNam
     isReady = ctx.isReady;
     const polkadotCtx = usePolkadotContext();
     selectedAccount = polkadotCtx.selectedAccount;
-  } catch {
-    // Not in Polkadot provider
-  }
-
+  } catch {}
   useEffect(() => {
     if (isEvm || !isReady) return;
-
     const contract = contracts[params.contractName];
     if (!contract) return;
-
     const queryContract = async () => {
       setPolkadotLoading(true);
       try {
-        const callerAddress = selectedAccount?.address || "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"; // Alice default
+        const callerAddress = selectedAccount?.address || "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
         const { result, output } = await contract.query[params.functionName](
           callerAddress,
           { gasLimit: -1 },
@@ -63,14 +53,17 @@ export const useChainReadContract = (params: { contractName: string; functionNam
         setPolkadotLoading(false);
       }
     };
-
     queryContract();
-  }, [isEvm, isReady, params.contractName, params.functionName, JSON.stringify(params.args, (_k, v) => (typeof v === "bigint" ? v.toString() : v))]); // eslint-disable-line
-
+  }, [
+    isEvm,
+    isReady,
+    params.contractName,
+    params.functionName,
+    JSON.stringify(params.args, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
+  ]);
   if (isEvm) {
     return evmResult as any;
   }
-
   return {
     data: polkadotData,
     isLoading: polkadotLoading,
@@ -78,7 +71,6 @@ export const useChainReadContract = (params: { contractName: string; functionNam
     refetch: () => {},
   } as any;
 };
-
 /**
  * Unified contract write hook.
  * In EVM mode, delegates to useScaffoldWriteContract.
@@ -87,13 +79,9 @@ export const useChainReadContract = (params: { contractName: string; functionNam
 export const useChainWriteContract = (params: { contractName: string }) => {
   const { isEvm } = useChainContext();
   const [isPending, setIsPending] = useState(false);
-
-  // EVM path
   const evmResult = useScaffoldWriteContract({
     contractName: params.contractName as any,
   } as any);
-
-  // Polkadot path
   let contracts: Record<string, any> = {};
   let isReady = false;
   let selectedAccount: any = null;
@@ -103,34 +91,25 @@ export const useChainWriteContract = (params: { contractName: string }) => {
     isReady = ctx.isReady;
     const polkadotCtx = usePolkadotContext();
     selectedAccount = polkadotCtx.selectedAccount;
-  } catch {
-    // Not in Polkadot provider
-  }
-
+  } catch {}
   const writeAsync = useCallback(
     async (writeParams: { functionName: string; args?: any[] }) => {
       if (!isReady || !selectedAccount) {
         throw new Error("Polkadot not connected");
       }
-
       const contract = contracts[params.contractName];
       if (!contract) {
         throw new Error(`Contract ${params.contractName} not found`);
       }
-
       setIsPending(true);
       try {
         const { web3FromSource } = await import("@polkadot/extension-dapp");
         const injector = await web3FromSource(selectedAccount.source);
-
-        // Dry run to estimate gas
         const { gasRequired } = await contract.query[writeParams.functionName](
           selectedAccount.address,
           { gasLimit: -1 },
           ...(writeParams.args || []),
         );
-
-        // Submit transaction
         await contract.tx[writeParams.functionName]({ gasLimit: gasRequired }, ...(writeParams.args || [])).signAndSend(
           selectedAccount.address,
           { signer: injector.signer },
@@ -141,11 +120,9 @@ export const useChainWriteContract = (params: { contractName: string }) => {
     },
     [isReady, selectedAccount, contracts, params.contractName],
   );
-
   if (isEvm) {
     return evmResult as any;
   }
-
   return {
     writeContractAsync: writeAsync,
     isPending,

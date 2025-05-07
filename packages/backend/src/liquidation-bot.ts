@@ -2,7 +2,6 @@ import { ethers } from "ethers";
 import { logger } from "./logger";
 import { config } from "./config";
 import { ChainAdapter, PositionData } from "./adapters/chain-adapter";
-
 /**
  * Core liquidation bot engine — Chain Agnostic.
  * 
@@ -12,49 +11,38 @@ export class LiquidationBot {
   private adapter: ChainAdapter;
   private liquidationThreshold: bigint;
   private targetHealthFactor: number;
-
   private borrowers: Set<string> = new Set();
   private scanTimer: NodeJS.Timeout | null = null;
   private isRunning: boolean = false;
   private totalLiquidations: number = 0;
-
   constructor(adapter: ChainAdapter) {
     this.adapter = adapter;
-
-    // Parse threshold from config (1.0 = 1e18)
     this.liquidationThreshold = ethers.parseEther(config.bot.liquidationThreshold.toString());
     this.targetHealthFactor = config.bot.targetHealthFactor;
   }
-
   async start(): Promise<void> {
     logger.info(`🤖 Liquidation bot starting on ${(this.adapter.constructor as any).name}...`);
     this.isRunning = true;
-
     await this.adapter.connect();
     await this._loadBorrowers();
     this._startEventListeners();
-
     this.scanTimer = setInterval(
       () => this._scanAndLiquidate(),
       config.bot.scanIntervalMs
     );
-
     await this._scanAndLiquidate();
-
     logger.info("🤖 Liquidation bot running", {
       borrowerCount: this.borrowers.size,
       threshold: ethers.formatEther(this.liquidationThreshold),
       scanInterval: `${config.bot.scanIntervalMs}ms`,
     });
   }
-
   stop(): void {
     this.isRunning = false;
     if (this.scanTimer) clearInterval(this.scanTimer);
     this.adapter.removeAllListeners();
     logger.info("🤖 Liquidation bot stopped");
   }
-
   updateThresholdFromRiskScore(riskScore: number): void {
     const adjustedThreshold = 1.0 + (riskScore / 100) * 0.15;
     this.liquidationThreshold = ethers.parseEther(adjustedThreshold.toFixed(4));
@@ -63,14 +51,12 @@ export class LiquidationBot {
       newThreshold: adjustedThreshold.toFixed(4),
     });
   }
-
   async getPositions(): Promise<PositionData[]> {
     const positions: PositionData[] = [];
     for (const borrower of this.borrowers) {
       try {
         const pos = await this.adapter.getPosition(borrower);
         const hf = await this.adapter.getHealthFactor(borrower);
-
         if (pos.debtAmount > 0n) {
           positions.push({
             borrower,
@@ -85,7 +71,6 @@ export class LiquidationBot {
     }
     return positions;
   }
-
   getStats() {
     return {
       isRunning: this.isRunning,
@@ -95,7 +80,6 @@ export class LiquidationBot {
       chain: this.adapter.constructor.name,
     };
   }
-
   private async _loadBorrowers(): Promise<void> {
     try {
       const count = await this.adapter.getBorrowerCount();
@@ -108,13 +92,11 @@ export class LiquidationBot {
       logger.error("Failed to load borrowers", { error: error.message });
     }
   }
-
   private _startEventListeners(): void {
     this.adapter.onBorrow((user, amount) => {
       this.borrowers.add(user);
       logger.info(`📥 New borrow detected`, { user, amount: amount.toString() });
     });
-
     this.adapter.onRepay(async (user) => {
       try {
         const pos = await this.adapter.getPosition(user);
@@ -124,20 +106,17 @@ export class LiquidationBot {
         }
       } catch {}
     });
-
     this.adapter.onLiquidation((liquidator, borrower, debtRepaid, collateralSeized) => {
       logger.info(`⚡ Liquidation event`, {
         liquidator, borrower, debtRepaid: debtRepaid.toString(), collateralSeized: collateralSeized.toString(),
       });
     });
   }
-
   private async _scanAndLiquidate(): Promise<void> {
     if (!this.isRunning) return;
     try {
       const positions = await this.getPositions();
       const liquidatable = positions.filter(p => p.healthFactor < this.liquidationThreshold);
-
       if (liquidatable.length > 0) {
         logger.warn(`🚨 Found ${liquidatable.length} liquidatable positions!`);
         for (const pos of liquidatable) {
@@ -148,44 +127,29 @@ export class LiquidationBot {
       logger.error("Scan failed", { error: error.message });
     }
   }
-
   private async _executeLiquidation(pos: PositionData): Promise<void> {
     try {
       const PRECISION = BigInt("1000000000000000000");
       const targetHF = ethers.parseEther(this.targetHealthFactor.toString());
-
-      // 1. Fetch protocol parameters
       const params = await this.adapter.getProtocolParams();
       const collateralPrice = await this.adapter.getOraclePrice(params.oracleAddress, this.adapter.getCollateralToken());
       const debtPrice = await this.adapter.getOraclePrice(params.oracleAddress, this.adapter.getDebtToken());
-
-      // 2. Calculate values
       const collateralValueUSD = (pos.collateralAmount * collateralPrice) / 10n**8n;
       const adjustedCollateral = (collateralValueUSD * params.ltv) / PRECISION;
       const debtValueUSD = (pos.debtAmount * debtPrice) / 10n**8n;
-
-      // 3. Optimal repay (simplistic port)
       const numerator = (targetHF * debtValueUSD / PRECISION) - adjustedCollateral;
       const denominator = targetHF - ((PRECISION + params.liquidationIncentive) * params.ltv / PRECISION);
       let optimalRepayUSD = (numerator * PRECISION) / denominator;
       let optimalRepay18 = (optimalRepayUSD * 10n**8n) / debtPrice;
-
       const maxRepay18 = (pos.debtAmount * params.closeFactor) / PRECISION;
       if (optimalRepay18 > maxRepay18) optimalRepay18 = maxRepay18;
-
-      // USDC has 6 decimals, but debtAmount in adapter might be normalized
       const repayAmount = optimalRepay18 / 10n**12n; 
-
       if (repayAmount === 0n) return;
-
-      // 4. Balance check
       const ourBalance = await this.adapter.getBalance(this.adapter.getDebtToken(), this.adapter.getWalletAddress());
       if (ourBalance < repayAmount) {
         logger.warn(`Insufficient balance to liquidate ${pos.borrower}`);
         return;
       }
-
-      // 5. Submit
       logger.info(`⚡ Executing liquidation for ${pos.borrower}`, { repayAmount: repayAmount.toString() });
       const txHash = await this.adapter.executeLiquidation(pos.borrower, repayAmount);
       logger.info(`✅ Liquidation successful: ${txHash}`);

@@ -12,10 +12,9 @@ import scaffoldConfig from "~~/scaffold.config";
 const Dashboard = () => {
   const { isEvm } = useChainContext();
   const networkName = isEvm ? "EVM / Hardhat" : (scaffoldConfig as any).polkadotConfig?.networkName || "Polkadot";
-
   return (
     <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full min-h-screen bg-base-200/20">
-      {/* Upper Dashboard Header */}
+      {}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-base-100 p-8 rounded-2xl border border-base-300 shadow-sm">
         <div className="flex items-center justify-between w-full lg:w-auto gap-4">
           <div className="flex items-center gap-4">
@@ -32,7 +31,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
         <div className="flex flex-col lg:flex-row items-center gap-6">
           <Link
             href="/portfolio"
@@ -46,24 +44,20 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Protocol Core Statistics */}
+      {}
       <ProtocolStats />
-
-      {/* Primary Analytics & Interaction Layer */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Market Positions Registry */}
+        {}
         <div className="lg:col-span-8 flex flex-col gap-8">
           <PositionsTable />
         </div>
-
-        {/* Terminal Controls */}
+        {}
         <div className="lg:col-span-4 flex flex-col gap-8">
           <CrossChainStatus />
         </div>
       </div>
-
-      {/* Protocol Footer Status */}
+      {}
       <div className="mt-4 flex items-center justify-center gap-6 opacity-20 text-[10px] font-black uppercase tracking-[0.5em]">
         <span>Network: {networkName}</span>
         <span>•</span>
@@ -72,5 +66,4 @@ const Dashboard = () => {
     </div>
   );
 };
-
 export default Dashboard;

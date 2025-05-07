@@ -6,7 +6,6 @@ import contractData from "~~/contracts/deployedContracts";
 
 type ContractsInterfaces = Record<string, Abi>;
 type TransactionType = TransactionWithFunction | null;
-
 const deployedContracts = contractData as GenericContractsDeclaration | null;
 const chainMetaData = deployedContracts?.[hardhat.id];
 const interfaces = chainMetaData
@@ -15,7 +14,6 @@ const interfaces = chainMetaData
       return finalInterfacesObj;
     }, {} as ContractsInterfaces)
   : {};
-
 export const decodeTransactionData = (tx: TransactionWithFunction) => {
   if (tx.input.length >= 10 && !tx.input.startsWith("0x60e06040")) {
     let foundInterface = false;
@@ -37,9 +35,7 @@ export const decodeTransactionData = (tx: TransactionWithFunction) => {
         })?.inputs.map((input: any) => input.type);
         foundInterface = true;
         break;
-      } catch {
-        // do nothing
-      }
+      } catch {}
     }
     if (!foundInterface) {
       tx.functionName = "⚠️ Unknown";
@@ -47,7 +43,6 @@ export const decodeTransactionData = (tx: TransactionWithFunction) => {
   }
   return tx;
 };
-
 export const getFunctionDetails = (transaction: TransactionType) => {
   if (
     transaction &&

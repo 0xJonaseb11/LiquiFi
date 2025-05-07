@@ -2,7 +2,6 @@ import { useState } from "react";
 
 export const useCopyToClipboard = () => {
   const [isCopiedToClipboard, setIsCopiedToClipboard] = useState(false);
-
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -14,6 +13,5 @@ export const useCopyToClipboard = () => {
       console.error("Failed to copy text:", err);
     }
   };
-
   return { copyToClipboard, isCopiedToClipboard };
 };

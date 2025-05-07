@@ -23,36 +23,26 @@ export const DepositBorrowPanel = () => {
   const [repayAmount, setRepayAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [activeTab, setActiveTab] = useState<"deposit" | "borrow" | "repay" | "withdraw">("deposit");
-
-  // Read user position
   const { data: position } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getPosition",
     args: [address || "0x0000000000000000000000000000000000000000"],
   });
-
   const { data: healthFactor } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getHealthFactor",
     args: [address || "0x0000000000000000000000000000000000000000"],
   });
-
-  // Write hooks
   const { writeContractAsync: writeMockCollateral } = useChainWriteContract({
     contractName: isEvm ? "MockWETH" : "MockWDOT",
   });
-
   const { writeContractAsync: writeMockUSDC } = useChainWriteContract({
     contractName: "MockUSDC",
   });
-
   const { writeContractAsync: writePool, isPending: poolPending } = useChainWriteContract({
     contractName: "LendingPool",
   });
-
-  // Get contract info for addresses (still using scaffold hook as it's safe for addresses)
   const { data: lendingPoolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
-
   const handleMintTokens = async () => {
     try {
       if (!address) return;
@@ -68,7 +58,6 @@ export const DepositBorrowPanel = () => {
       console.error("Mint failed:", e);
     }
   };
-
   const handleDeposit = async () => {
     try {
       const amount = parseEther(depositAmount);
@@ -85,7 +74,6 @@ export const DepositBorrowPanel = () => {
       console.error("Deposit failed:", e);
     }
   };
-
   const handleBorrow = async () => {
     try {
       const amount = parseUnits(borrowAmount, 6);
@@ -98,7 +86,6 @@ export const DepositBorrowPanel = () => {
       console.error("Borrow failed:", e);
     }
   };
-
   const handleRepay = async () => {
     try {
       const amount = parseUnits(repayAmount, 6);
@@ -115,7 +102,6 @@ export const DepositBorrowPanel = () => {
       console.error("Repay failed:", e);
     }
   };
-
   const handleWithdraw = async () => {
     try {
       const amount = parseEther(withdrawAmount);
@@ -128,7 +114,6 @@ export const DepositBorrowPanel = () => {
       console.error("Withdraw failed:", e);
     }
   };
-
   const hfNum = healthFactor ? Number.parseFloat(formatEther(healthFactor)) : 0;
   let hfDisplay = "—";
   if (healthFactor) {
@@ -138,23 +123,20 @@ export const DepositBorrowPanel = () => {
       hfDisplay = hfNum.toFixed(3);
     }
   }
-
   const getHFColor = () => {
     if (hfDisplay === "∞" || hfNum >= 1.5) return "text-success";
     if (hfNum >= 1) return "text-warning";
     return "text-error";
   };
-
-  const inputValue = 
-    activeTab === "deposit" ? depositAmount :
-    activeTab === "borrow" ? borrowAmount :
-    activeTab === "repay" ? repayAmount : withdrawAmount;
-
-  const unitLabel = 
-    (activeTab === "deposit" || activeTab === "withdraw") 
-      ? (isEvm ? "WETH" : "wDOT") 
-      : "USDC";
-
+  const inputValue =
+    activeTab === "deposit"
+      ? depositAmount
+      : activeTab === "borrow"
+        ? borrowAmount
+        : activeTab === "repay"
+          ? repayAmount
+          : withdrawAmount;
+  const unitLabel = activeTab === "deposit" || activeTab === "withdraw" ? (isEvm ? "WETH" : "wDOT") : "USDC";
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex flex-col h-full">
       <div className="p-4 border-b border-base-300 flex items-center justify-between bg-base-200/30">
@@ -170,9 +152,8 @@ export const DepositBorrowPanel = () => {
           Mint Test Tokens
         </button>
       </div>
-
       <div className="p-6 flex-grow">
-        {/* Position Context */}
+        {}
         <div className="grid grid-cols-3 gap-4 mb-8 bg-base-200/50 p-4 rounded-xl border border-base-300/50">
           <div className="flex flex-col">
             <span className="text-[10px] uppercase opacity-40 font-black mb-1">Collateral</span>
@@ -193,8 +174,7 @@ export const DepositBorrowPanel = () => {
             <span className={`font-black tracking-tighter ${getHFColor()}`}>{hfDisplay}</span>
           </div>
         </div>
-
-        {/* Navigation Tabs */}
+        {}
         <div className="flex gap-1 p-1 bg-base-200 rounded-lg mb-6">
           {(["deposit", "borrow", "repay", "withdraw"] as const).map(tab => (
             <button
@@ -208,8 +188,7 @@ export const DepositBorrowPanel = () => {
             </button>
           ))}
         </div>
-
-        {/* Action Form */}
+        {}
         <div className="space-y-4">
           <div className="relative">
             <input
@@ -224,11 +203,8 @@ export const DepositBorrowPanel = () => {
                 else setWithdrawAmount(e.target.value);
               }}
             />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 font-black opacity-30 text-xs">
-              {unitLabel}
-            </div>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 font-black opacity-30 text-xs">{unitLabel}</div>
           </div>
-
           <button
             className="w-full py-4 rounded-xl premium-gradient text-white font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50"
             onClick={() => {
@@ -251,7 +227,6 @@ export const DepositBorrowPanel = () => {
               </>
             )}
           </button>
-
           <div className="flex items-center justify-center gap-2 opacity-30 text-[10px] font-black uppercase tracking-tighter">
             <ShieldCheckIcon className="w-3 h-3" />
             Instant on-chain settlement

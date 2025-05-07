@@ -7,12 +7,10 @@ import { BaseError as BaseViemError, ContractFunctionRevertedError } from "viem"
  */
 export const getParsedError = (error: any): string => {
   const parsedError = error?.walk ? error.walk() : error;
-
   if (parsedError instanceof BaseViemError) {
     if (parsedError.details) {
       return parsedError.details;
     }
-
     if (parsedError.shortMessage) {
       if (
         parsedError instanceof ContractFunctionRevertedError &&
@@ -24,12 +22,9 @@ export const getParsedError = (error: any): string => {
           parsedError.data.errorName
         }(${customErrorArgs})`;
       }
-
       return parsedError.shortMessage;
     }
-
     return parsedError.message ?? parsedError.name ?? "An unknown error occurred";
   }
-
   return parsedError?.message ?? "An unknown error occurred";
 };

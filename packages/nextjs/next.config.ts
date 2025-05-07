@@ -15,9 +15,7 @@ const nextConfig: NextConfig = {
     return config;
   },
 };
-
 const isIpfs = process.env.NEXT_PUBLIC_IPFS_BUILD === "true";
-
 if (isIpfs) {
   nextConfig.output = "export";
   nextConfig.trailingSlash = true;
@@ -25,5 +23,4 @@ if (isIpfs) {
     unoptimized: true,
   };
 }
-
 module.exports = nextConfig;

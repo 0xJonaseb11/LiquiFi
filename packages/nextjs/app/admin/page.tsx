@@ -10,7 +10,7 @@ const AdminPage = () => {
   return (
     <AdminGuard>
       <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full min-h-screen bg-base-200/20">
-        {/* Upper Admin Header */}
+        {}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-base-100 p-8 rounded-2xl border border-base-300 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-2xl bg-error text-error-content shadow-lg shadow-error/20">
@@ -29,13 +29,11 @@ const AdminPage = () => {
             <RiskScoreWidget />
           </div>
         </div>
-
-        {/* Protocol Core Statistics (For Admin context) */}
+        {}
         <ProtocolStats />
-
-        {/* Primary Analytics & Interaction Layer */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Terminal Controls */}
+          {}
           <div className="lg:col-span-12 flex flex-col gap-8">
             <AdminPanel />
           </div>
@@ -44,5 +42,4 @@ const AdminPage = () => {
     </AdminGuard>
   );
 };
-
 export default AdminPage;

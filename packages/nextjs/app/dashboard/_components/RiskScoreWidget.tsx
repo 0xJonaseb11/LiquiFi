@@ -9,11 +9,9 @@ type RiskData = {
   recommended_threshold: number;
   source: string;
 };
-
 export const RiskScoreWidget = () => {
   const [risk, setRisk] = useState<RiskData | null>(null);
   const [loading, setLoading] = useState(false);
-
   const fetchRisk = async () => {
     setLoading(true);
     try {
@@ -21,7 +19,6 @@ export const RiskScoreWidget = () => {
       if (!backendUrl) {
         throw new Error("No backend URL configured");
       }
-
       const res = await fetch(`${backendUrl}/api/risk-score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,19 +38,16 @@ export const RiskScoreWidget = () => {
     }
     setLoading(false);
   };
-
   useEffect(() => {
     fetchRisk();
     const interval = setInterval(fetchRisk, 60000);
     return () => clearInterval(interval);
   }, []);
-
   const getScoreColor = (score: number) => {
     if (score < 30) return "text-success";
     if (score < 60) return "text-warning";
     return "text-error";
   };
-
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
       <div className="p-4 border-b border-base-300 flex items-center justify-between bg-base-200/30">
@@ -67,7 +61,6 @@ export const RiskScoreWidget = () => {
           <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-success/20 text-success">Live</span>
         )}
       </div>
-
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -90,7 +83,6 @@ export const RiskScoreWidget = () => {
             </span>
           </div>
         </div>
-
         <div className="bg-base-200/50 rounded-lg p-3 border border-base-300/50 flex-grow">
           <div className="flex items-start gap-2">
             <ShieldExclamationIcon className="w-4 h-4 opacity-30 mt-0.5" />
@@ -102,7 +94,6 @@ export const RiskScoreWidget = () => {
             </div>
           </div>
         </div>
-
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <div

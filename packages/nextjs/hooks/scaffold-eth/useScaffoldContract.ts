@@ -31,9 +31,7 @@ export const useScaffoldContract = <
     contractName,
     chainId: selectedNetwork?.id as AllowedChainIds,
   });
-
   const publicClient = usePublicClient({ chainId: selectedNetwork?.id });
-
   let contract = undefined;
   if (deployedContractData && publicClient) {
     contract = getContract<
@@ -57,7 +55,6 @@ export const useScaffoldContract = <
       } as any,
     });
   }
-
   return {
     data: contract,
     isLoading: deployedContractLoading,

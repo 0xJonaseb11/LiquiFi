@@ -7,7 +7,6 @@ export const useContractLogs = (address: Address) => {
   const [logs, setLogs] = useState<Log[]>([]);
   const { targetNetwork } = useTargetNetwork();
   const client = usePublicClient({ chainId: targetNetwork.id });
-
   useEffect(() => {
     const fetchLogs = async () => {
       if (!client) return console.error("Client not found");
@@ -23,7 +22,6 @@ export const useContractLogs = (address: Address) => {
       }
     };
     fetchLogs();
-
     return client?.watchBlockNumber({
       onBlockNumber: async (_blockNumber, prevBlockNumber) => {
         const newLogs = await client.getLogs({
@@ -35,6 +33,5 @@ export const useContractLogs = (address: Address) => {
       },
     });
   }, [address, client]);
-
   return logs;
 };

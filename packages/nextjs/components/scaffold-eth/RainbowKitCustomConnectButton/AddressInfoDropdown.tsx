@@ -19,16 +19,13 @@ import { getTargetNetworks } from "~~/utils/scaffold-eth";
 import { isENS } from "~~/utils/scaffold-eth/common";
 
 const BURNER_WALLET_ID = "burnerWallet";
-
 const allowedNetworks = getTargetNetworks();
-
 type AddressInfoDropdownProps = {
   address: Address;
   blockExplorerAddressLink: string | undefined;
   displayName: string;
   ensAvatar?: string;
 };
-
 export const AddressInfoDropdown = ({
   address,
   ensAvatar,
@@ -38,19 +35,15 @@ export const AddressInfoDropdown = ({
   const { disconnect } = useDisconnect();
   const { connector } = useAccount();
   const checkSumAddress = getAddress(address);
-
   const { copyToClipboard: copyAddressToClipboard, isCopiedToClipboard: isAddressCopiedToClipboard } =
     useCopyToClipboard();
   const [selectingNetwork, setSelectingNetwork] = useState(false);
   const dropdownRef = useRef<HTMLDetailsElement>(null);
-
   const closeDropdown = () => {
     setSelectingNetwork(false);
     dropdownRef.current?.removeAttribute("open");
   };
-
   useOutsideClick(dropdownRef, closeDropdown);
-
   return (
     <>
       <details ref={dropdownRef} className="dropdown dropdown-end leading-3">

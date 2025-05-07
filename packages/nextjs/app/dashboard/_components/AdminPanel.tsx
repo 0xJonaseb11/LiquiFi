@@ -24,33 +24,26 @@ export const AdminPanel = () => {
   const [closeFactor, setCloseFactor] = useState("50");
   const [incentive, setIncentive] = useState("5");
   const [threshold, setThreshold] = useState("100");
-
   const { data: collateralInfo } = useDeployedContractInfo({ contractName: (isEvm ? "MockWETH" : "MockWDOT") as any });
   const { data: usdcInfo } = useDeployedContractInfo({ contractName: "MockUSDC" });
   const { data: poolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
-
   const { writeContractAsync: writeOracle, isPending: oraclePending } = useChainWriteContract({
     contractName: "PriceOracle",
   });
-
   const { writeContractAsync: writePool, isPending: poolPending } = useChainWriteContract({
     contractName: "LendingPool",
   });
-
   const { writeContractAsync: writeUSDC } = useChainWriteContract({
     contractName: "MockUSDC",
   });
-
   const { data: isPaused } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "paused",
   });
-
   const handleSetPrice = async () => {
     try {
       const ethPrice8 = BigInt(Math.round(Number.parseFloat(ethPrice) * 1e8));
-      const usdcPrice8 = BigInt(1 * 1e8); // USDC is $1
-
+      const usdcPrice8 = BigInt(1 * 1e8);
       if (collateralInfo?.address) {
         await writeOracle({
           functionName: "setPrice",
@@ -67,7 +60,6 @@ export const AdminPanel = () => {
       console.error("Set price failed:", e);
     }
   };
-
   const handleSeedLiquidity = async () => {
     try {
       const amount = parseUnits(seedAmount, 6);
@@ -84,7 +76,6 @@ export const AdminPanel = () => {
       console.error("Seed liquidity failed:", e);
     }
   };
-
   const handleLiquidate = async () => {
     try {
       const amount = parseUnits(liquidateAmount, 6);
@@ -100,7 +91,6 @@ export const AdminPanel = () => {
       console.error("Liquidation failed:", e);
     }
   };
-
   const handleSetLTV = async () => {
     try {
       const ltvWei = parseEther((Number.parseFloat(newLtv) / 100).toString());
@@ -112,7 +102,6 @@ export const AdminPanel = () => {
       console.error("Set LTV failed:", e);
     }
   };
-
   const handleSetLiquidationParams = async () => {
     try {
       const cfWei = parseEther((Number.parseFloat(closeFactor) / 100).toString());
@@ -125,7 +114,6 @@ export const AdminPanel = () => {
       console.error("Set Liquidation Params failed:", e);
     }
   };
-
   const handleSetThreshold = async () => {
     try {
       const thresholdWei = parseEther((Number.parseFloat(threshold) / 100).toString());
@@ -137,7 +125,6 @@ export const AdminPanel = () => {
       console.error("Set Threshold failed:", e);
     }
   };
-
   const handleTogglePause = async () => {
     try {
       await writePool({
@@ -147,7 +134,6 @@ export const AdminPanel = () => {
       console.error("Toggle pause failed:", e);
     }
   };
-
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex flex-col">
       <div className="p-4 border-b border-base-300 flex items-center justify-between bg-base-200/30">
@@ -164,9 +150,8 @@ export const AdminPanel = () => {
           {isPaused ? "Resume" : "Halt"}
         </button>
       </div>
-
       <div className="p-6 space-y-6">
-        {/* Set Oracle Price */}
+        {}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <CurrencyDollarIcon className="w-3.5 h-3.5 opacity-50" />
@@ -184,10 +169,8 @@ export const AdminPanel = () => {
             </button>
           </div>
         </div>
-
         <div className="border-t border-base-300/50" />
-
-        {/* Manual Liquidation */}
+        {}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <FireIcon className="w-3.5 h-3.5 text-error opacity-50" />
@@ -218,10 +201,8 @@ export const AdminPanel = () => {
             </button>
           </div>
         </div>
-
         <div className="border-t border-base-300/50" />
-
-        {/* Set LTV */}
+        {}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <AdjustmentsHorizontalIcon className="w-3.5 h-3.5 opacity-50" />
@@ -239,10 +220,8 @@ export const AdminPanel = () => {
             </button>
           </div>
         </div>
-
         <div className="border-t border-base-300/50" />
-
-        {/* Seed Liquidity */}
+        {}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <CurrencyDollarIcon className="w-3.5 h-3.5 opacity-50" />
@@ -261,10 +240,8 @@ export const AdminPanel = () => {
             </button>
           </div>
         </div>
-
         <div className="border-t border-base-300/50" />
-
-        {/* Liquidation Config */}
+        {}
         <div className="space-y-4">
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -301,7 +278,6 @@ export const AdminPanel = () => {
               Update Risk Params
             </button>
           </div>
-
           <div>
             <div className="flex items-center gap-2 mb-3">
               <BoltIcon className="w-3.5 h-3.5 opacity-50" />

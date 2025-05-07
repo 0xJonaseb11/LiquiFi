@@ -8,7 +8,6 @@ export type BaseConfig = {
   walletConnectProjectId: string;
   burnerWalletMode: "localNetworksOnly" | "allNetworks" | "disabled";
 };
-
 export type PolkadotNetworkConfig = {
   rpcEndpoint: string;
   networkName: string;
@@ -16,47 +15,23 @@ export type PolkadotNetworkConfig = {
   tokenDecimals: number;
   contractAddresses: Record<string, string>;
 };
-
 export type ScaffoldConfig = BaseConfig & {
   polkadotConfig?: PolkadotNetworkConfig;
 };
-
 export const DEFAULT_ALCHEMY_API_KEY = "cR4WnXePioePZ5fFrnSiR";
-
 const scaffoldConfig = {
-  // The networks on which your DApp is live
   targetNetworks: [chains.baseSepolia, chains.hardhat],
-  // The interval at which your front-end polls the RPC servers for new data (it has no effect if you only target the local network (default is 4000))
   pollingInterval: 3000,
-  // This is ours Alchemy's default API key.
-  // You can get your own at https://dashboard.alchemyapi.io
-  // It's recommended to store it in an env variable:
-  // .env.local for local testing, and in the Vercel/system env config for live apps.
   alchemyApiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || DEFAULT_ALCHEMY_API_KEY,
-  // If you want to use a different RPC for a specific network, you can add it here.
-  // The key is the chain ID, and the value is the HTTP RPC URL
-  rpcOverrides: {
-    // Example:
-    // [chains.mainnet.id]: "https://mainnet.rpc.buidlguidl.com",
-  },
-  // This is ours WalletConnect's default project ID.
-  // You can get your own at https://cloud.walletconnect.com
-  // It's recommended to store it in an env variable:
-  // .env.local for local testing, and in the Vercel/system env config for live apps.
+  rpcOverrides: {},
   walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "3a8170812b534d0ff9d794f19a901d64",
-  // Configure Burner Wallet visibility:
-  // - "localNetworksOnly": only show when all target networks are local (hardhat/anvil)
-  // - "allNetworks": show on any configured target networks
-  // - "disabled": completely disable
   burnerWalletMode: "localNetworksOnly",
-  // Polkadot / Astar configuration
   polkadotConfig: {
     rpcEndpoint: process.env.NEXT_PUBLIC_POLKADOT_RPC || "wss://rpc.shibuya.astar.network",
     networkName: "Shibuya (Astar Testnet)",
     tokenSymbol: "SBY",
     tokenDecimals: 18,
     contractAddresses: {
-      // Placeholder — update after deploying ink! contracts
       LendingPool: process.env.NEXT_PUBLIC_POLKADOT_LENDING_POOL || "",
       PriceOracle: process.env.NEXT_PUBLIC_POLKADOT_PRICE_ORACLE || "",
       InterestRateModel: process.env.NEXT_PUBLIC_POLKADOT_INTEREST_RATE_MODEL || "",
@@ -65,7 +40,6 @@ const scaffoldConfig = {
     },
   },
 } as const satisfies ScaffoldConfig;
-
 /**
  * Convenience mapping for newly deployed Base Sepolia contracts
  */
@@ -91,5 +65,4 @@ export const CONTRACT_ADDRESSES = {
     MockUSDC: "0x74a8eb9f2D6d8e098a4FA030a1Eac57B0a6a4106",
   },
 } as const;
-
 export default scaffoldConfig;

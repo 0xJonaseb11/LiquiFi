@@ -11,7 +11,6 @@ type TransactionFunc = (
   tx: (() => Promise<Hash>) | Parameters<SendTransactionMutate<Config, undefined>>[0],
   options?: TransactorFuncOptions,
 ) => Promise<Hash | undefined>;
-
 /**
  * Custom notification content for TXs.
  */
@@ -27,7 +26,6 @@ const TxnNotification = ({ message, blockExplorerLink }: { message: string; bloc
     </div>
   );
 };
-
 /**
  * Runs Transaction passed in to returned function showing UI feedback.
  * @param _walletClient - Optional wallet client to use. If not provided, will use the one from useWalletClient.
@@ -39,14 +37,12 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
   if (walletClient === undefined && data) {
     walletClient = data;
   }
-
   const result: TransactionFunc = async (tx, options) => {
     if (!walletClient) {
       notification.error("Cannot access account");
       console.error("⚡️ ~ file: useTransactor.tsx ~ error");
       return;
     }
-
     let notificationId = null;
     let transactionHash: Hash | undefined = undefined;
     let transactionReceipt: TransactionReceipt | undefined;
@@ -54,12 +50,9 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
     let chainId: number = scaffoldConfig.targetNetworks[0].id;
     try {
       chainId = await walletClient.getChainId();
-      // Get full transaction from public client
       const publicClient = getPublicClient(wagmiConfig);
-
       notificationId = notification.loading(<TxnNotification message="Awaiting for user confirmation" />);
       if (typeof tx === "function") {
-        // Tx is already prepared by the caller
         const result = await tx();
         transactionHash = result;
       } else if (tx != null) {
@@ -68,28 +61,22 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
         throw new Error("Incorrect transaction passed to transactor");
       }
       notification.remove(notificationId);
-
       blockExplorerTxURL = chainId ? getBlockExplorerTxLink(chainId, transactionHash) : "";
-
       notificationId = notification.loading(
         <TxnNotification message="Waiting for transaction to complete." blockExplorerLink={blockExplorerTxURL} />,
       );
-
       transactionReceipt = await publicClient.waitForTransactionReceipt({
         hash: transactionHash,
         confirmations: options?.blockConfirmations,
       });
       notification.remove(notificationId);
-
       if (transactionReceipt.status === "reverted") throw new Error("Transaction reverted");
-
       notification.success(
         <TxnNotification message="Transaction completed successfully!" blockExplorerLink={blockExplorerTxURL} />,
         {
           icon: "🎉",
         },
       );
-
       if (options?.onBlockConfirmation) options.onBlockConfirmation(transactionReceipt);
     } catch (error: any) {
       if (notificationId) {
@@ -97,19 +84,14 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       }
       console.error("⚡️ ~ file: useTransactor.ts ~ error", error);
       const message = getParsedErrorWithAllAbis(error, chainId as AllowedChainIds);
-
-      // if receipt was reverted, show notification with block explorer link and return error
       if (transactionReceipt?.status === "reverted") {
         notification.error(<TxnNotification message={message} blockExplorerLink={blockExplorerTxURL} />);
         throw error;
       }
-
       notification.error(message);
       throw error;
     }
-
     return transactionHash;
   };
-
   return result;
 };

@@ -29,7 +29,6 @@ export const useScaffoldWatchContractEvent = <
     contractName,
     chainId: selectedNetwork.id as AllowedChainIds,
   });
-
   return useWatchContractEvent({
     address: deployedContractData?.address,
     abi: deployedContractData?.abi as Abi,

@@ -5,11 +5,9 @@ import { useCopyToClipboard } from "~~/hooks/scaffold-eth";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
 
 const BURNER_WALLET_PK_KEY = "burnerWallet.pk";
-
 export const RevealBurnerPKModal = () => {
   const { copyToClipboard, isCopiedToClipboard } = useCopyToClipboard();
   const modalCheckboxRef = useRef<HTMLInputElement>(null);
-
   const handleCopyPK = async () => {
     try {
       const storage = rainbowkitBurnerWallet.useSessionStorage ? sessionStorage : localStorage;
@@ -23,14 +21,13 @@ export const RevealBurnerPKModal = () => {
       if (modalCheckboxRef.current) modalCheckboxRef.current.checked = false;
     }
   };
-
   return (
     <>
       <div>
         <input type="checkbox" id="reveal-burner-pk-modal" className="modal-toggle" ref={modalCheckboxRef} />
         <label htmlFor="reveal-burner-pk-modal" className="modal cursor-pointer">
           <label className="modal-box relative">
-            {/* dummy input to capture event onclick on modal box */}
+            {}
             <input className="h-0 w-0 absolute top-0 left-0" />
             <label htmlFor="reveal-burner-pk-modal" className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3">
               ✕

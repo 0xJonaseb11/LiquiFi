@@ -13,43 +13,35 @@ type HistoryEvent = {
   txHash: string;
   blockNumber: bigint;
 };
-
 export const UserTransactionHistory = () => {
   const { address } = useChainAccount();
   const { isEvm } = useChainContext();
-
   const { data: depositEvents, isLoading: isDepositLoading } = useChainEventHistory({
     contractName: "LendingPool",
     eventName: "Deposit",
     fromBlock: 0n,
     filters: { user: address },
   });
-
   const { data: withdrawEvents, isLoading: isWithdrawLoading } = useChainEventHistory({
     contractName: "LendingPool",
     eventName: "Withdraw",
     fromBlock: 0n,
     filters: { user: address },
   });
-
   const { data: borrowEvents, isLoading: isBorrowLoading } = useChainEventHistory({
     contractName: "LendingPool",
     eventName: "Borrow",
     fromBlock: 0n,
     filters: { user: address },
   });
-
   const { data: repayEvents, isLoading: isRepayLoading } = useChainEventHistory({
     contractName: "LendingPool",
     eventName: "Repay",
     fromBlock: 0n,
     filters: { user: address },
   });
-
   const isLoading = isDepositLoading || isWithdrawLoading || isBorrowLoading || isRepayLoading;
-
   const history: HistoryEvent[] = [];
-
   if (depositEvents) {
     depositEvents.forEach((e: any) => {
       history.push({
@@ -61,7 +53,6 @@ export const UserTransactionHistory = () => {
       });
     });
   }
-
   if (withdrawEvents) {
     withdrawEvents.forEach((e: any) => {
       history.push({
@@ -73,7 +64,6 @@ export const UserTransactionHistory = () => {
       });
     });
   }
-
   if (borrowEvents) {
     borrowEvents.forEach((e: any) => {
       history.push({
@@ -85,7 +75,6 @@ export const UserTransactionHistory = () => {
       });
     });
   }
-
   if (repayEvents) {
     repayEvents.forEach((e: any) => {
       history.push({
@@ -97,10 +86,7 @@ export const UserTransactionHistory = () => {
       });
     });
   }
-
-  // Sort descending by block number
   history.sort((a, b) => Number(b.blockNumber - a.blockNumber));
-
   let content;
   if (isLoading) {
     content = (
@@ -145,14 +131,12 @@ export const UserTransactionHistory = () => {
       </table>
     );
   }
-
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex flex-col h-full">
       <div className="p-4 border-b border-base-300 flex items-center gap-2 bg-base-200/30">
         <ClockIcon className="w-4 h-4 opacity-50" />
         <h2 className="text-xs uppercase font-black tracking-widest opacity-60">Transaction History</h2>
       </div>
-
       <div className="p-0 overflow-y-auto max-h-[400px]">{content}</div>
     </div>
   );

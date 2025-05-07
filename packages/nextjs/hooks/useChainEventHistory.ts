@@ -10,14 +10,10 @@ import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
  */
 export const useChainEventHistory = (config: any) => {
   const { isEvm } = useChainContext();
-
   const evmEvents = useScaffoldEventHistory(isEvm ? config : { ...config, enabled: false });
-
   if (isEvm) {
     return evmEvents;
   }
-
-  // Polkadot placeholder
   return {
     data: [],
     isLoading: false,

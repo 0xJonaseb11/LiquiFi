@@ -13,25 +13,21 @@ import {
 const Home: NextPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-base-100">
-      {/* Hero Section */}
+      {}
       <div className="relative flex-grow flex items-center justify-center py-24 px-4 overflow-hidden border-b border-base-300">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)]" />
-
         <div className="max-w-4xl text-center z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-8">
             <CpuChipIcon className="w-3.5 h-3.5" />
             Autonomous AI Liquidation Protocol
           </div>
-
           <h1 className="text-7xl md:text-9xl font-black tracking-tighter mb-8 leading-[0.8] uppercase italic">
             Liqui<span className="text-primary not-italic">Fi</span>
           </h1>
-
           <p className="text-lg md:text-xl opacity-60 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
             The next generation of lending. Protected by real-time AI risk assessment and cross-chain liquidation nodes
             via LayerZero.
           </p>
-
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/dashboard"
@@ -46,8 +42,7 @@ const Home: NextPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Features Grid */}
+      {}
       <div className="container mx-auto px-4 py-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="flex flex-col p-2">
@@ -60,7 +55,6 @@ const Home: NextPage = () => {
               ensure optimal capital flow.
             </p>
           </div>
-
           <div className="flex flex-col p-2">
             <div className="w-12 h-12 rounded-xl premium-gradient flex items-center justify-center text-white mb-8 shadow-lg shadow-primary/20">
               <CpuChipIcon className="w-6 h-6" />
@@ -71,7 +65,6 @@ const Home: NextPage = () => {
               in real-time.
             </p>
           </div>
-
           <div className="flex flex-col p-2">
             <div className="w-12 h-12 rounded-xl premium-gradient flex items-center justify-center text-white mb-8 shadow-lg shadow-primary/20">
               <ArrowsRightLeftIcon className="w-6 h-6" />
@@ -84,8 +77,7 @@ const Home: NextPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Trust Footer */}
+      {}
       <div className="bg-base-200 py-16 border-t border-base-300">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
@@ -110,5 +102,4 @@ const Home: NextPage = () => {
     </div>
   );
 };
-
 export default Home;

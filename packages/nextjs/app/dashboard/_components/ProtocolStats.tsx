@@ -17,31 +17,28 @@ export const ProtocolStats = () => {
     contractName: "LendingPool",
     functionName: "getTotalDeposits",
   });
-
   const { data: totalBorrows } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getTotalBorrows",
   });
-
   const { data: utilizationRate } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getUtilizationRate",
   });
-
   const { data: borrowRate } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getBorrowRate",
   });
-
   const { data: borrowerCount } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getBorrowerCount",
   });
-
   const stats = [
     {
       label: "Total TVL",
-      value: totalDeposits ? `${Number.parseFloat(formatEther(totalDeposits)).toFixed(2)} ${isEvm ? "WETH" : "wDOT"}` : "—",
+      value: totalDeposits
+        ? `${Number.parseFloat(formatEther(totalDeposits)).toFixed(2)} ${isEvm ? "WETH" : "wDOT"}`
+        : "—",
       icon: <BanknotesIcon className="w-4 h-4" />,
       color: "text-success",
     },
@@ -59,7 +56,9 @@ export const ProtocolStats = () => {
     },
     {
       label: "Current APR",
-      value: borrowRate ? `${(Number.parseFloat(formatEther(borrowRate)) * 365.25 * 24 * 3600 * 100).toFixed(2)}%` : "—",
+      value: borrowRate
+        ? `${(Number.parseFloat(formatEther(borrowRate)) * 365.25 * 24 * 3600 * 100).toFixed(2)}%`
+        : "—",
       icon: <PresentationChartLineIcon className="w-4 h-4" />,
       color: "text-primary",
     },
@@ -70,7 +69,6 @@ export const ProtocolStats = () => {
       color: "text-secondary",
     },
   ];
-
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
       {stats.map(stat => (

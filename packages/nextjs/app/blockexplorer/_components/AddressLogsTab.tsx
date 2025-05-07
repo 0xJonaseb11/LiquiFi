@@ -4,7 +4,6 @@ import { replacer } from "~~/utils/scaffold-eth/common";
 
 export const AddressLogsTab = ({ address }: { address: Address }) => {
   const contractLogs = useContractLogs(address);
-
   return (
     <div className="flex flex-col gap-3 p-4">
       <div className="mockup-code overflow-auto max-h-[500px]">

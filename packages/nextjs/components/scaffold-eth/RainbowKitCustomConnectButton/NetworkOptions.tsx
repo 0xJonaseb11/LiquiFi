@@ -5,17 +5,14 @@ import { getNetworkColor } from "~~/hooks/scaffold-eth";
 import { getTargetNetworks } from "~~/utils/scaffold-eth";
 
 const allowedNetworks = getTargetNetworks();
-
 type NetworkOptionsProps = {
   hidden?: boolean;
 };
-
 export const NetworkOptions = ({ hidden = false }: NetworkOptionsProps) => {
   const { switchChain } = useSwitchChain();
   const { chain } = useAccount();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
-
   return (
     <>
       {allowedNetworks

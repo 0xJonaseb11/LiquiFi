@@ -15,13 +15,11 @@ type NotificationProps = {
   icon?: string;
   position?: ToastPosition;
 };
-
 type NotificationOptions = {
   duration?: number;
   icon?: string;
   position?: ToastPosition;
 };
-
 const ENUM_STATUSES = {
   success: <CheckCircleIcon className="w-7 text-success" />,
   loading: <span className="w-6 loading loading-spinner"></span>,
@@ -29,10 +27,8 @@ const ENUM_STATUSES = {
   info: <InformationCircleIcon className="w-7 text-info" />,
   warning: <ExclamationTriangleIcon className="w-7 text-warning" />,
 };
-
 const DEFAULT_DURATION = 3000;
 const DEFAULT_POSITION: ToastPosition = "top-center";
-
 /**
  * Custom Notification
  */
@@ -55,7 +51,6 @@ const Notification = ({
       >
         <div className="leading-[0] self-center">{icon ? icon : ENUM_STATUSES[status]}</div>
         <div className={`overflow-x-hidden break-words whitespace-pre-line ${icon ? "mt-1" : ""}`}>{content}</div>
-
         <div className={`cursor-pointer text-lg ${icon ? "mt-1" : ""}`} onClick={() => toast.dismiss(t.id)}>
           <XMarkIcon className="w-6 cursor-pointer" onClick={() => toast.remove(t.id)} />
         </div>
@@ -67,7 +62,6 @@ const Notification = ({
     },
   );
 };
-
 export const notification = {
   success: (content: React.ReactNode, options?: NotificationOptions) => {
     return Notification({ content, status: "success", ...options });

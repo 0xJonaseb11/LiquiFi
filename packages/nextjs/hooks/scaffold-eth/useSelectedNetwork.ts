@@ -10,10 +10,8 @@ import { ChainWithAttributes, NETWORKS_EXTRA_DATA } from "~~/utils/scaffold-eth/
 export function useSelectedNetwork(chainId?: AllowedChainIds): ChainWithAttributes {
   const globalTargetNetwork = useGlobalState(({ targetNetwork }) => targetNetwork);
   const targetNetwork = scaffoldConfig.targetNetworks.find(targetNetwork => targetNetwork.id === chainId);
-
   if (targetNetwork) {
     return { ...targetNetwork, ...NETWORKS_EXTRA_DATA[targetNetwork.id] };
   }
-
   return globalTargetNetwork;
 }

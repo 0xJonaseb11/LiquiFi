@@ -9,7 +9,6 @@ export const metadata = getMetadata({
   title: "LiquiFi",
   description: "Autonomous AI Liquidation Protocol",
 });
-
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   return (
     <html suppressHydrationWarning className={``}>
@@ -21,5 +20,4 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
     </html>
   );
 };
-
 export default ScaffoldEthApp;

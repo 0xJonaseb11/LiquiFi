@@ -9,16 +9,12 @@ import { usePolkadotContext } from "~~/providers/PolkadotProvider";
  */
 export const useChainAccount = () => {
   const { chainType, isEvm } = useChainContext();
-
-  // EVM side
   const {
     address: evmAddress,
     isConnected: evmConnected,
     isConnecting: evmConnecting,
     isReconnecting: evmReconnecting,
   } = useAccount();
-
-  // Polkadot side
   let polkadotAddress: string | undefined;
   let polkadotConnected = false;
   let polkadotConnecting = false;
@@ -27,17 +23,12 @@ export const useChainAccount = () => {
     polkadotAddress = polkadot.selectedAccount?.address;
     polkadotConnected = polkadot.isConnected;
     polkadotConnecting = polkadot.isConnecting;
-  } catch {
-    // Not wrapped in PolkadotProvider (EVM mode)
-  }
-
+  } catch {}
   const address = isEvm ? evmAddress : polkadotAddress;
   const isConnected = isEvm ? evmConnected : polkadotConnected;
   const isConnecting = isEvm ? evmConnecting : polkadotConnecting;
   const isReconnecting = isEvm ? evmReconnecting : false;
-
   const truncate = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-
   return {
     address,
     isConnected,

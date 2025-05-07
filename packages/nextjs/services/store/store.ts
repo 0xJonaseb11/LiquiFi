@@ -10,12 +10,10 @@ import { ChainWithAttributes, NETWORKS_EXTRA_DATA } from "~~/utils/scaffold-eth"
  *
  * Think about it as a global useState.
  */
-
 type GlobalState = {
   targetNetwork: ChainWithAttributes;
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) => void;
 };
-
 export const useGlobalState = create<GlobalState>(set => ({
   targetNetwork: {
     ...scaffoldConfig.targetNetworks[0],

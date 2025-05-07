@@ -13,19 +13,16 @@ const BlockExplorer: NextPage = () => {
   const { targetNetwork } = useTargetNetwork();
   const [isLocalNetwork, setIsLocalNetwork] = useState(true);
   const [hasError, setHasError] = useState(false);
-
   useEffect(() => {
     if (targetNetwork.id !== hardhat.id) {
       setIsLocalNetwork(false);
     }
   }, [targetNetwork.id]);
-
   useEffect(() => {
     if (targetNetwork.id === hardhat.id && error) {
       setHasError(true);
     }
   }, [targetNetwork.id, error]);
-
   useEffect(() => {
     if (!isLocalNetwork) {
       notification.error(
@@ -53,7 +50,6 @@ const BlockExplorer: NextPage = () => {
     targetNetwork.blockExplorers?.default.url,
     targetNetwork.name,
   ]);
-
   useEffect(() => {
     if (hasError) {
       notification.error(
@@ -70,7 +66,6 @@ const BlockExplorer: NextPage = () => {
       );
     }
   }, [hasError]);
-
   return (
     <div className="container mx-auto my-10">
       <SearchBar />
@@ -79,5 +74,4 @@ const BlockExplorer: NextPage = () => {
     </div>
   );
 };
-
 export default BlockExplorer;

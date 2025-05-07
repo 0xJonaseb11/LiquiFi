@@ -6,7 +6,6 @@ export const metadata = getMetadata({
   title: "Debug Contracts",
   description: "Debug LiquiFi smart contracts",
 });
-
 const Debug: NextPage = () => {
   return (
     <>
@@ -24,5 +23,4 @@ const Debug: NextPage = () => {
     </>
   );
 };
-
 export default Debug;

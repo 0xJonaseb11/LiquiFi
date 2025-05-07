@@ -11,7 +11,6 @@ export const PolkadotConnectButton = () => {
   const { accounts, selectedAccount, selectAccount, isConnected, isConnecting, connect, disconnect, error } =
     usePolkadotContext();
   const [showDropdown, setShowDropdown] = useState(false);
-
   if (!isConnected) {
     return (
       <div className="flex flex-col items-end gap-1">
@@ -39,9 +38,7 @@ export const PolkadotConnectButton = () => {
       </div>
     );
   }
-
   const truncateAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-
   return (
     <div className="relative">
       <button
@@ -52,7 +49,6 @@ export const PolkadotConnectButton = () => {
         <span>{selectedAccount?.name || truncateAddr(selectedAccount?.address || "")}</span>
         <span className="text-[8px] opacity-40 uppercase">{selectedAccount?.source}</span>
       </button>
-
       {showDropdown && (
         <div className="absolute right-0 top-full mt-2 bg-base-100 border border-base-300 rounded-xl shadow-xl p-2 min-w-[240px] z-50">
           <div className="text-[9px] uppercase font-black tracking-widest opacity-30 px-2 py-1 mb-1">

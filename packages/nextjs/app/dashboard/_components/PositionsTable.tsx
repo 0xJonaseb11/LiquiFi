@@ -11,10 +11,8 @@ export const PositionsTable = () => {
     contractName: "LendingPool",
     functionName: "getBorrowerCount",
   });
-
   const count = borrowerCount ? Number(borrowerCount) : 0;
   const indices = Array.from({ length: Math.min(count, 20) }, (_, i) => i);
-
   return (
     <div className="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm">
       <div className="p-4 border-b border-base-300 flex items-center justify-between">
@@ -53,42 +51,34 @@ export const PositionsTable = () => {
     </div>
   );
 };
-
 const PositionItem = ({ index }: { index: bigint }) => {
   const { data: poolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
   const { writeContractAsync: writePool } = useChainWriteContract({ contractName: "LendingPool" });
   const { writeContractAsync: writeUSDC } = useChainWriteContract({ contractName: "MockUSDC" });
-
   const { data: borrower } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getBorrowerAt",
     args: [index],
   });
-
   const { data: position } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getPosition",
     args: [borrower || "0x0000000000000000000000000000000000000000"],
   });
-
   const { data: hf } = useChainReadContract({
     contractName: "LendingPool",
     functionName: "getHealthFactor",
     args: [borrower || "0x0000000000000000000000000000000000000000"],
   });
-
   if (!borrower || !position || position.debtAmount === 0n) return null;
-
   const handleLiquidate = async () => {
     try {
       const repayAmountNormalized = position.debtAmount / 2n;
       const repayAmountActual = repayAmountNormalized / 10n ** 12n;
-
       await writeUSDC({
         functionName: "approve",
         args: [poolInfo?.address, repayAmountActual],
       });
-
       await writePool({
         functionName: "liquidate",
         args: [borrower, repayAmountActual],
@@ -97,7 +87,6 @@ const PositionItem = ({ index }: { index: bigint }) => {
       console.error("Liquidation failed:", e);
     }
   };
-
   const getHFBadge = (hfVal: bigint) => {
     const hfNum = parseFloat(formatEther(hfVal));
     if (hfVal === BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")) {
@@ -107,7 +96,6 @@ const PositionItem = ({ index }: { index: bigint }) => {
     if (hfNum >= 1.0) return <span className="text-warning font-black">{hfNum.toFixed(3)}</span>;
     return <span className="text-error font-black animate-pulse">{hfNum.toFixed(3)}</span>;
   };
-
   return (
     <tr className="hover:bg-primary/5 transition-colors group">
       <td className="py-4 font-mono text-xs opacity-80">

@@ -4,7 +4,6 @@ import { ArrowLeftOnRectangleIcon, ChevronDownIcon } from "@heroicons/react/24/o
 
 export const WrongNetworkDropdown = () => {
   const { disconnect } = useDisconnect();
-
   return (
     <div className="dropdown dropdown-end mr-2">
       <label tabIndex={0} className="btn btn-error btn-sm dropdown-toggle gap-1">

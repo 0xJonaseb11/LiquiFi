@@ -37,11 +37,8 @@ export const useScaffoldReadContract = <
     contractName,
     chainId: selectedNetwork.id as AllowedChainIds,
   });
-
   const { query: queryOptions, watch, ...readContractConfig } = readConfig;
-  // set watch to true by default
   const defaultWatch = watch ?? true;
-
   const readContractHookRes = useReadContract({
     chainId: selectedNetwork.id,
     functionName,
@@ -59,7 +56,6 @@ export const useScaffoldReadContract = <
       options?: RefetchOptions | undefined,
     ) => Promise<QueryObserverResult<AbiFunctionReturnType<ContractAbi, TFunctionName>, ReadContractErrorType>>;
   };
-
   const queryClient = useQueryClient();
   const { data: blockNumber } = useBlockNumber({
     watch: defaultWatch,
@@ -68,13 +64,10 @@ export const useScaffoldReadContract = <
       enabled: defaultWatch,
     },
   });
-
   useEffect(() => {
     if (defaultWatch) {
       queryClient.invalidateQueries({ queryKey: readContractHookRes.queryKey });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blockNumber]);
-
   return readContractHookRes;
 };

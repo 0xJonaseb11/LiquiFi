@@ -9,14 +9,11 @@ import { BanknotesIcon } from "@heroicons/react/24/outline";
 import { useTargetNetwork, useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
-// Account index to use from generated hardhat accounts.
 const FAUCET_ACCOUNT_INDEX = 0;
-
 const localWalletClient = createWalletClient({
   chain: hardhat,
   transport: http(),
 });
-
 /**
  * Faucet modal which lets you send ETH to any address.
  */
@@ -26,11 +23,8 @@ export const Faucet = () => {
   const [faucetAddress, setFaucetAddress] = useState<AddressType>();
   const [sendValue, setSendValue] = useState("");
   const { targetNetwork } = useTargetNetwork();
-
   const { chain: ConnectedChain } = useAccount();
-
   const faucetTxn = useTransactor(localWalletClient);
-
   useEffect(() => {
     const getFaucetAddress = async () => {
       try {
@@ -54,7 +48,6 @@ export const Faucet = () => {
     };
     getFaucetAddress();
   }, []);
-
   const sendETH = async () => {
     if (!faucetAddress || !inputAddress) {
       return;
@@ -74,12 +67,9 @@ export const Faucet = () => {
       setLoading(false);
     }
   };
-
-  // Render only on local chain
   if (ConnectedChain?.id !== hardhat.id) {
     return null;
   }
-
   return (
     <div>
       <label htmlFor="faucet-modal" className="btn btn-primary btn-sm font-normal gap-1">
@@ -89,7 +79,7 @@ export const Faucet = () => {
       <input type="checkbox" id="faucet-modal" className="modal-toggle" />
       <label htmlFor="faucet-modal" className="modal cursor-pointer">
         <label className="modal-box relative">
-          {/* dummy input to capture event onclick on modal box */}
+          {}
           <input className="h-0 w-0 absolute top-0 left-0" />
           <h3 className="text-xl font-bold mb-3">Local Faucet</h3>
           <label htmlFor="faucet-modal" className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3">

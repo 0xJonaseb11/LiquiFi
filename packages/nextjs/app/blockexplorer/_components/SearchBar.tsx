@@ -9,9 +9,7 @@ import { usePublicClient } from "wagmi";
 export const SearchBar = () => {
   const [searchInput, setSearchInput] = useState("");
   const router = useRouter();
-
   const client = usePublicClient({ chainId: hardhat.id });
-
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
     if (isHex(searchInput)) {
@@ -25,13 +23,11 @@ export const SearchBar = () => {
         console.error("Failed to fetch transaction:", error);
       }
     }
-
     if (isAddress(searchInput)) {
       router.push(`/blockexplorer/address/${searchInput}`);
       return;
     }
   };
-
   return (
     <form onSubmit={handleSearch} className="flex items-center justify-end mb-5 space-x-3 mx-5">
       <input

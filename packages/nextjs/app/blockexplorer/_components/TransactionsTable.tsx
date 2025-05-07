@@ -8,7 +8,6 @@ import { TransactionsTableProps } from "~~/utils/scaffold-eth/";
 
 export const TransactionsTable = ({ blocks, transactionReceipts }: TransactionsTableProps) => {
   const { targetNetwork } = useTargetNetwork();
-
   return (
     <div className="flex justify-center px-4 md:px-0">
       <div className="overflow-x-auto w-full shadow-2xl rounded-xl">
@@ -30,7 +29,6 @@ export const TransactionsTable = ({ blocks, transactionReceipts }: TransactionsT
                 const receipt = transactionReceipts[tx.hash];
                 const timeMined = new Date(Number(block.timestamp) * 1000).toLocaleString();
                 const functionCalled = tx.input.substring(0, 10);
-
                 return (
                   <tr key={tx.hash} className="hover text-sm">
                     <td className="w-1/12 md:py-4">

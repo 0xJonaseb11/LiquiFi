@@ -4,7 +4,6 @@ const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : `http://localhost:${process.env.PORT || 3000}`;
 const titleTemplate = "%s | LiquiFi";
-
 export const getMetadata = ({
   title,
   description,
@@ -15,7 +14,6 @@ export const getMetadata = ({
   imageRelativePath?: string;
 }): Metadata => {
   const imageUrl = `${baseUrl}${imageRelativePath}`;
-
   return {
     metadataBase: new URL(baseUrl),
     title: {

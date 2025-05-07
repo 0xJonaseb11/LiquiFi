@@ -3,7 +3,6 @@
 import { type ReactNode, createContext, useCallback, useContext, useState } from "react";
 
 export type ChainType = "evm" | "polkadot";
-
 interface ChainContextValue {
   chainType: ChainType;
   setChainType: (type: ChainType) => void;
@@ -11,7 +10,6 @@ interface ChainContextValue {
   isEvm: boolean;
   toggleChain: () => void;
 }
-
 const ChainContext = createContext<ChainContextValue>({
   chainType: "evm",
   setChainType: () => {},
@@ -19,14 +17,11 @@ const ChainContext = createContext<ChainContextValue>({
   isEvm: true,
   toggleChain: () => {},
 });
-
 export const ChainProvider = ({ children }: { children: ReactNode }) => {
   const [chainType, setChainType] = useState<ChainType>("evm");
-
   const toggleChain = useCallback(() => {
     setChainType(prev => (prev === "evm" ? "polkadot" : "evm"));
   }, []);
-
   return (
     <ChainContext.Provider
       value={{
@@ -41,5 +36,4 @@ export const ChainProvider = ({ children }: { children: ReactNode }) => {
     </ChainContext.Provider>
   );
 };
-
 export const useChainContext = () => useContext(ChainContext);

@@ -16,27 +16,21 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
   const [transaction, setTransaction] = useState<Transaction>();
   const [receipt, setReceipt] = useState<TransactionReceipt>();
   const [functionCalled, setFunctionCalled] = useState<string>();
-
   const { targetNetwork } = useTargetNetwork();
-
   useEffect(() => {
     if (txHash && client) {
       const fetchTransaction = async () => {
         const tx = await client.getTransaction({ hash: txHash });
         const receipt = await client.getTransactionReceipt({ hash: txHash });
-
         const transactionWithDecodedData = decodeTransactionData(tx);
         setTransaction(transactionWithDecodedData);
         setReceipt(receipt);
-
         const functionCalled = transactionWithDecodedData.input.substring(0, 10);
         setFunctionCalled(functionCalled);
       };
-
       fetchTransaction();
     }
   }, [client, txHash]);
-
   return (
     <div className="container mx-auto mt-10 mb-20 px-10 md:px-0">
       <button className="btn btn-sm btn-primary" onClick={() => router.back()}>
@@ -173,5 +167,4 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
     </div>
   );
 };
-
 export default TransactionComp;

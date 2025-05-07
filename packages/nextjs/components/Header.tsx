@@ -40,20 +40,15 @@ export const menuLinks: HeaderMenuLink[] = [
     icon: <CircleStackIcon className="h-4 w-4" />,
   },
 ];
-
 export const HeaderMenuLinks = () => {
   const pathname = usePathname();
   const { isEvm } = useChainContext();
-
-  // Only read owner from EVM contracts when in EVM mode
   const { address } = useAccount();
   const { data: owner } = useScaffoldReadContract({
     contractName: "LendingPool",
     functionName: "owner",
   });
-
   const isAdmin = isEvm && address && owner && address === owner;
-
   const links = [...menuLinks];
   if (isAdmin) {
     links.push({
@@ -62,7 +57,6 @@ export const HeaderMenuLinks = () => {
       icon: <ShieldExclamationIcon className="h-4 w-4" />,
     });
   }
-
   return (
     <>
       {links.map(({ label, href, icon }) => {
@@ -85,21 +79,17 @@ export const HeaderMenuLinks = () => {
     </>
   );
 };
-
 /**
  * Site header — now with network toggle and chain-aware wallet button
  */
 export const Header = () => {
   const { isEvm } = useChainContext();
-
   const { targetNetwork } = useTargetNetwork();
   const isLocalNetwork = isEvm && targetNetwork.id === hardhat.id;
-
   const burgerMenuRef = useRef<HTMLDetailsElement>(null);
   useOutsideClick(burgerMenuRef, () => {
     burgerMenuRef?.current?.removeAttribute("open");
   });
-
   return (
     <div className="sticky lg:static top-0 navbar bg-base-100/80 backdrop-blur-md min-h-0 shrink-0 justify-between z-20 border-b border-base-300 px-4 sm:px-8">
       <div className="navbar-start w-auto lg:w-1/2">

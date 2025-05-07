@@ -8,12 +8,10 @@ import { type ChainType, useChainContext } from "~~/contexts/ChainContext";
  */
 export const NetworkToggle = () => {
   const { chainType, setChainType } = useChainContext();
-
   const options: { value: ChainType; label: string; color: string }[] = [
     { value: "evm", label: "EVM", color: "bg-blue-500" },
     { value: "polkadot", label: "Polkadot", color: "bg-pink-500" },
   ];
-
   return (
     <div className="flex items-center bg-base-200 rounded-full p-0.5 border border-base-300 shadow-sm">
       {options.map(opt => {

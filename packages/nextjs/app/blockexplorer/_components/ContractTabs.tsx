@@ -14,31 +14,25 @@ type AddressCodeTabProps = {
   bytecode: string;
   assembly: string;
 };
-
 type PageProps = {
   address: Address;
   contractData: AddressCodeTabProps | null;
 };
-
 const publicClient = createPublicClient({
   chain: hardhat,
   transport: http(),
 });
-
 export const ContractTabs = ({ address, contractData }: PageProps) => {
   const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage } = useFetchBlocks();
   const [activeTab, setActiveTab] = useState("transactions");
   const [isContract, setIsContract] = useState(false);
-
   useEffect(() => {
     const checkIsContract = async () => {
       const contractCode = await publicClient.getBytecode({ address: address });
       setIsContract(contractCode !== undefined && contractCode !== "0x");
     };
-
     checkIsContract();
   }, [address]);
-
   const filteredBlocks = blocks.filter(block =>
     block.transactions.some(tx => {
       if (typeof tx === "string") {
@@ -47,7 +41,6 @@ export const ContractTabs = ({ address, contractData }: PageProps) => {
       return tx.from.toLowerCase() === address.toLowerCase() || tx.to?.toLowerCase() === address.toLowerCase();
     }),
   );
-
   return (
     <>
       {isContract && (

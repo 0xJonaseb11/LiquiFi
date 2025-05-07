@@ -13,7 +13,6 @@ import { hardhat } from "viem/chains";
 import { decodeTransactionData } from "~~/utils/scaffold-eth";
 
 const BLOCKS_PER_PAGE = 20;
-
 export const testClient = createTestClient({
   chain: hardhat,
   mode: "hardhat",
@@ -21,7 +20,6 @@ export const testClient = createTestClient({
 })
   .extend(publicActions)
   .extend(walletActions);
-
 export const useFetchBlocks = () => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [transactionReceipts, setTransactionReceipts] = useState<{
@@ -30,20 +28,16 @@ export const useFetchBlocks = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalBlocks, setTotalBlocks] = useState(0n);
   const [error, setError] = useState<Error | null>(null);
-
   const fetchBlocks = useCallback(async () => {
     setError(null);
-
     try {
       const blockNumber = await testClient.getBlockNumber();
       setTotalBlocks(blockNumber);
-
       const startingBlock = blockNumber - BigInt(currentPage * BLOCKS_PER_PAGE);
       const blockNumbersToFetch = Array.from(
         { length: Number(BLOCKS_PER_PAGE < startingBlock + 1n ? BLOCKS_PER_PAGE : startingBlock + 1n) },
         (_, i) => startingBlock - BigInt(i),
       );
-
       const blocksWithTransactions = blockNumbersToFetch.map(async blockNumber => {
         try {
           return testClient.getBlock({ blockNumber, includeTransactions: true });
@@ -53,11 +47,9 @@ export const useFetchBlocks = () => {
         }
       });
       const fetchedBlocks = await Promise.all(blocksWithTransactions);
-
       fetchedBlocks.forEach(block => {
         block.transactions.forEach(tx => decodeTransactionData(tx as Transaction));
       });
-
       const txReceipts = await Promise.all(
         fetchedBlocks.flatMap(block =>
           block.transactions.map(async tx => {
@@ -71,18 +63,15 @@ export const useFetchBlocks = () => {
           }),
         ),
       );
-
       setBlocks(fetchedBlocks);
       setTransactionReceipts(prevReceipts => ({ ...prevReceipts, ...Object.assign({}, ...txReceipts) }));
     } catch (err) {
       setError(err instanceof Error ? err : new Error("An error occurred."));
     }
   }, [currentPage]);
-
   useEffect(() => {
     fetchBlocks();
   }, [fetchBlocks]);
-
   useEffect(() => {
     const handleNewBlock = async (newBlock: any) => {
       try {
@@ -93,9 +82,7 @@ export const useFetchBlocks = () => {
             );
             newBlock.transactions = transactionsDetails;
           }
-
           newBlock.transactions.forEach((tx: Transaction) => decodeTransactionData(tx as Transaction));
-
           const receipts = await Promise.all(
             newBlock.transactions.map(async (tx: Transaction) => {
               try {
@@ -107,7 +94,6 @@ export const useFetchBlocks = () => {
               }
             }),
           );
-
           setBlocks(prevBlocks => [newBlock, ...prevBlocks.slice(0, BLOCKS_PER_PAGE - 1)]);
           setTransactionReceipts(prevReceipts => ({ ...prevReceipts, ...Object.assign({}, ...receipts) }));
         }
@@ -118,10 +104,8 @@ export const useFetchBlocks = () => {
         setError(err instanceof Error ? err : new Error("An error occurred."));
       }
     };
-
     return testClient.watchBlocks({ onBlock: handleNewBlock, includeTransactions: true });
   }, [currentPage]);
-
   return {
     blocks,
     transactionReceipts,

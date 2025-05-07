@@ -6,11 +6,9 @@ export type TransactionWithFunction = Transaction & {
   functionArgNames?: string[];
   functionArgTypes?: string[];
 };
-
 type TransactionReceipts = {
   [key: string]: TransactionReceipt;
 };
-
 export type TransactionsTableProps = {
   blocks: Block[];
   transactionReceipts: TransactionReceipts;

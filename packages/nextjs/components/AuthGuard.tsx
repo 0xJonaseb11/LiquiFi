@@ -8,17 +8,14 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const { isConnected, isConnecting, isReconnecting } = useChainAccount();
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
   useEffect(() => {
     if (isMounted && !isConnecting && !isReconnecting && !isConnected) {
       router.push("/");
     }
   }, [isConnected, isConnecting, isReconnecting, router, isMounted]);
-
   if (!isMounted || isConnecting || isReconnecting || !isConnected) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-200/20">
@@ -26,6 +23,5 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-
   return <>{children}</>;
 };

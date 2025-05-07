@@ -9,29 +9,23 @@ export const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   const { address, isConnected, isConnecting, isReconnecting } = useAccount();
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-
   const { data: owner, isLoading: isOwnerLoading } = useScaffoldReadContract({
     contractName: "LendingPool",
     functionName: "owner",
   });
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
   useEffect(() => {
     if (!isMounted) return;
-
     if (!isConnecting && !isReconnecting && !isConnected) {
       router.push("/");
       return;
     }
-
     if (!isOwnerLoading && owner && address !== owner) {
       router.push("/dashboard");
     }
   }, [address, owner, isOwnerLoading, isConnected, isConnecting, isReconnecting, router, isMounted]);
-
   if (!isMounted || isConnecting || isReconnecting || !isConnected || isOwnerLoading || !owner) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-200/20">
@@ -39,10 +33,8 @@ export const AdminGuard = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-
   if (address !== owner) {
     return null;
   }
-
   return <>{children}</>;
 };

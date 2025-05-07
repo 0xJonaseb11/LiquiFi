@@ -8,7 +8,6 @@ import { MockPriceFeed } from "./price-feed";
 import { CrossChainModule } from "./cross-chain-module";
 import { EvmAdapter } from "./adapters/evm-adapter";
 import { PolkadotAdapter } from "./adapters/polkadot-adapter";
-
 /**
  * LiquiFi Bot — Main entry point.
  * Orchestrates all backend services: liquidation bot, price feed,
@@ -18,17 +17,10 @@ async function main() {
   logger.info("═".repeat(50));
   logger.info("  🏦 LiquiFi Liquidation Bot Starting...");
   logger.info("═".repeat(50));
-
   const chainType = process.env.CHAIN_TYPE || "evm";
   logger.info(`Target Chain: ${chainType.toUpperCase()}`);
-
-  // 1. Initialize Adapter
   const adapter = chainType === "polkadot" ? new PolkadotAdapter() : new EvmAdapter();
-
-  // 2. Initialize liquidation bot with adapter
   const bot = new LiquidationBot(adapter);
-
-  // 3. Initialize price feed (mock for local)
   const priceFeed = new MockPriceFeed();
   priceFeed.on("priceUpdate", ({ asset, price }: any) => {
     logger.debug(`Price update: ${asset} = $${price.toFixed(2)}`);
@@ -37,8 +29,6 @@ async function main() {
     logger.warn(`⚠️ Price deviation alert: ${asset} moved ${(deviation * 100).toFixed(1)}%`);
   });
   priceFeed.connect();
-
-  // 4. AI risk scoring — poll periodically
   const aiUpdateLoop = setInterval(async () => {
     try {
       const response = await fetch(`${config.ai.serviceUrl}/api/risk-score`, {
@@ -52,27 +42,19 @@ async function main() {
       if (response.ok) {
         const data = await response.json() as any;
         bot.updateThresholdFromRiskScore(data.risk_score);
-        
-        // Active on-chain risk management
         const currentOnChainThreshold = bot.getStats().currentThreshold;
-        const recommendedThreshold = data.recommended_threshold; // e.g. 1.05
-        
+        const recommendedThreshold = data.recommended_threshold; 
         const diff = Math.abs(parseFloat(currentOnChainThreshold) - recommendedThreshold);
         if (diff > 0.01) {
           logger.info(`🚨 AI recommending on-chain threshold update: ${currentOnChainThreshold} → ${recommendedThreshold}`);
         }
-
         logger.info(`AI Risk Score: ${data.risk_score}/100`, { reasoning: data.reasoning });
       }
     } catch {
       logger.debug("AI service unavailable, using default threshold");
     }
   }, config.ai.updateIntervalMs);
-
-  // 5. Start the bot
   await bot.start();
-
-  // Graceful shutdown
   const shutdown = () => {
     logger.info("Shutting down...");
     bot.stop();
@@ -80,13 +62,10 @@ async function main() {
     clearInterval(aiUpdateLoop);
     process.exit(0);
   };
-
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
-
   logger.info("🤖 All systems operational. Press Ctrl+C to stop.");
 }
-
 main().catch((error) => {
   logger.error("Fatal error", { error: error.message, stack: error.stack });
   process.exit(1);

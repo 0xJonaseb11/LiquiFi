@@ -1,5 +1,4 @@
 import winston from "winston";
-
 /**
  * Structured logger with timestamps, levels, and colored console output.
  * Production would add file transport with rotation.

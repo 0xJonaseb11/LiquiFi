@@ -1,7 +1,6 @@
 import { ethers } from "ethers";
 import { logger } from "./logger";
 import { NonceManager } from "./nonce-manager";
-
 /**
  * Priority-based transaction queue for managing concurrent blockchain operations.
  *
@@ -17,7 +16,6 @@ export enum TxPriority {
   HIGH = 1,
   NORMAL = 2,
 }
-
 interface QueuedTransaction {
   id: string;
   priority: TxPriority;
@@ -29,7 +27,6 @@ interface QueuedTransaction {
   maxRetries: number;
   description: string;
 }
-
 export class TransactionQueue {
   private queue: QueuedTransaction[] = [];
   private processing: boolean = false;
@@ -37,12 +34,10 @@ export class TransactionQueue {
   private maxRetries: number;
   private processedCount: number = 0;
   private failedCount: number = 0;
-
   constructor(nonceManager: NonceManager, maxRetries: number = 3) {
     this.nonceManager = nonceManager;
     this.maxRetries = maxRetries;
   }
-
   /**
    * Add a transaction to the queue.
    * Returns a promise that resolves when the TX is mined.
@@ -64,26 +59,20 @@ export class TransactionQueue {
         maxRetries: this.maxRetries,
         description,
       };
-
-      // Insert in priority order (lower number = higher priority)
       const insertIndex = this.queue.findIndex(q => q.priority > priority);
       if (insertIndex === -1) {
         this.queue.push(item);
       } else {
         this.queue.splice(insertIndex, 0, item);
       }
-
       logger.info(`TX queued: ${description}`, {
         id: item.id,
         priority: TxPriority[priority],
         queueLength: this.queue.length,
       });
-
-      // Start processing if not already running
       this._processQueue();
     });
   }
-
   /**
    * Get current queue stats.
    */
@@ -95,23 +84,14 @@ export class TransactionQueue {
       pending: this.nonceManager.getPendingCount(),
     };
   }
-
-  // ──────────────────────────────────────────────
-  //  Internal Processing
-  // ──────────────────────────────────────────────
-
   private async _processQueue(): Promise<void> {
     if (this.processing || this.queue.length === 0) return;
     this.processing = true;
-
     while (this.queue.length > 0) {
       const item = this.queue.shift()!;
-
       try {
         logger.info(`Processing TX: ${item.description}`, { id: item.id });
         const tx = await this.nonceManager.sendTransaction(item.txRequest);
-
-        // Wait for confirmation
         const receipt = await tx.wait();
         if (receipt && receipt.status === 1) {
           this.processedCount++;
@@ -130,9 +110,7 @@ export class TransactionQueue {
           logger.warn(`TX failed, retrying (${item.retryCount}/${item.maxRetries}): ${item.description}`, {
             error: error.message,
           });
-          // Re-insert at front of same priority
           this.queue.unshift(item);
-          // Wait before retry
           await new Promise(resolve => setTimeout(resolve, 1000 * item.retryCount));
         } else {
           this.failedCount++;
@@ -144,7 +122,6 @@ export class TransactionQueue {
         }
       }
     }
-
     this.processing = false;
   }
 }

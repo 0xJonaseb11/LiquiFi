@@ -9,7 +9,7 @@ const PortfolioPage = () => {
   return (
     <AuthGuard>
       <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full min-h-screen bg-base-200/20">
-        {/* Upper Portfolio Header */}
+        {}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-base-100 p-8 rounded-2xl border border-base-300 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-2xl premium-gradient text-white shadow-lg shadow-primary/20">
@@ -25,21 +25,18 @@ const PortfolioPage = () => {
             </div>
           </div>
         </div>
-
-        {/* Primary Analytics & Interaction Layer */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Transaction History */}
+          {}
           <div className="lg:col-span-7 flex flex-col gap-8">
             <UserTransactionHistory />
           </div>
-
-          {/* Terminal Controls */}
+          {}
           <div className="lg:col-span-5 flex flex-col gap-8">
             <DepositBorrowPanel />
           </div>
         </div>
-
-        {/* Protocol Footer Status */}
+        {}
         <div className="mt-4 flex items-center justify-center gap-6 opacity-20 text-[10px] font-black uppercase tracking-[0.5em]">
           <span>Network: Hardhat</span>
           <span>•</span>
@@ -49,5 +46,4 @@ const PortfolioPage = () => {
     </AuthGuard>
   );
 };
-
 export default PortfolioPage;

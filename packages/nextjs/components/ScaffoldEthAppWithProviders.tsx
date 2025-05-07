@@ -27,7 +27,6 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
     </>
   );
 };
-
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -35,18 +34,14 @@ export const queryClient = new QueryClient({
     },
   },
 });
-
-/** Inner component that reads chainType from context */
 const ChainAwareProviders = ({ children }: { children: React.ReactNode }) => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const [mounted, setMounted] = useState(false);
   const { isEvm } = useChainContext();
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
@@ -65,7 +60,6 @@ const ChainAwareProviders = ({ children }: { children: React.ReactNode }) => {
     </WagmiProvider>
   );
 };
-
 export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <ChainProvider>

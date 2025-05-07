@@ -10,13 +10,11 @@ const publicClient = createPublicClient({
   chain: mainnet,
   transport: fallback(rpcFallbacks),
 });
-
 const ABI = parseAbi([
   "function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
   "function token0() external view returns (address)",
   "function token1() external view returns (address)",
 ]);
-
 export const fetchPriceFromUniswap = async (targetNetwork: ChainWithAttributes): Promise<number> => {
   if (
     targetNetwork.nativeCurrency.symbol !== "ETH" &&
@@ -33,22 +31,18 @@ export const fetchPriceFromUniswap = async (targetNetwork: ChainWithAttributes):
       18,
     );
     const pairAddress = Pair.getAddress(TOKEN, DAI) as Address;
-
     const wagmiConfig = {
       address: pairAddress,
       abi: ABI,
     };
-
     const reserves = await publicClient.readContract({
       ...wagmiConfig,
       functionName: "getReserves",
     });
-
     const token0Address = await publicClient.readContract({
       ...wagmiConfig,
       functionName: "token0",
     });
-
     const token1Address = await publicClient.readContract({
       ...wagmiConfig,
       functionName: "token1",

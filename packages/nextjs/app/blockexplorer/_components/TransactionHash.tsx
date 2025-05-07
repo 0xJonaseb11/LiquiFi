@@ -5,7 +5,6 @@ import { useCopyToClipboard } from "~~/hooks/scaffold-eth/useCopyToClipboard";
 export const TransactionHash = ({ hash }: { hash: string }) => {
   const { copyToClipboard: copyAddressToClipboard, isCopiedToClipboard: isAddressCopiedToClipboard } =
     useCopyToClipboard();
-
   return (
     <div className="flex items-center">
       <Link href={`/blockexplorer/transaction/${hash}`}>

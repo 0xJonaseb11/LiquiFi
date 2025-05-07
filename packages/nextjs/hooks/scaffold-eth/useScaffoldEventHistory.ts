@@ -32,7 +32,6 @@ const getEvents = async (
     event: getLogsParams.event,
   });
   if (!logs) return undefined;
-
   const finalEvents = await Promise.all(
     logs.map(async log => {
       return {
@@ -50,10 +49,8 @@ const getEvents = async (
       };
     }),
   );
-
   return finalEvents;
 };
-
 /**
  * @deprecated **Recommended only for local (hardhat/anvil) chains and development.**
  * It uses getLogs which can overload RPC endpoints (especially on L2s with short block times).
@@ -95,8 +92,6 @@ export const useScaffoldEventHistory = <
   blocksBatchSize = 500,
 }: UseScaffoldEventHistoryConfig<TContractName, TEventName, TBlockData, TTransactionData, TReceiptData>) => {
   const selectedNetwork = useSelectedNetwork(chainId);
-
-  // Runtime warning for non-local chains
   useEffect(() => {
     if (selectedNetwork.id !== hardhat.id) {
       console.log(
@@ -104,27 +99,21 @@ export const useScaffoldEventHistory = <
       );
     }
   }, [selectedNetwork.id]);
-
   const publicClient = usePublicClient({
     chainId: selectedNetwork.id,
   });
   const [liveEvents, setLiveEvents] = useState<any[]>([]);
   const [lastFetchedBlock, setLastFetchedBlock] = useState<bigint | null>(null);
   const [isPollingActive, setIsPollingActive] = useState(false);
-
   const { data: blockNumber } = useBlockNumber({ watch: watch, chainId: selectedNetwork.id });
-
   const { data: deployedContractData } = useDeployedContractInfo({
     contractName,
     chainId: selectedNetwork.id as AllowedChainIds,
   });
-
   const event =
     deployedContractData &&
     ((deployedContractData.abi as Abi).find(part => part.type === "event" && part.name === eventName) as AbiEvent);
-
   const isContractAddressAndClientReady = Boolean(deployedContractData?.address) && Boolean(publicClient);
-
   const fromBlockValue =
     fromBlock !== undefined
       ? fromBlock
@@ -133,7 +122,6 @@ export const useScaffoldEventHistory = <
             ? deployedContractData.deployedOnBlock || 0
             : 0,
         );
-
   const query = useInfiniteQuery({
     queryKey: [
       "eventHistory",
@@ -150,15 +138,12 @@ export const useScaffoldEventHistory = <
     ],
     queryFn: async ({ pageParam }) => {
       if (!isContractAddressAndClientReady) return undefined;
-
-      // Calculate the toBlock for this batch
       let batchToBlock = toBlock;
       const batchEndBlock = pageParam + BigInt(blocksBatchSize) - 1n;
       const maxBlock = toBlock || (blockNumber ? BigInt(blockNumber) : undefined);
       if (maxBlock) {
         batchToBlock = batchEndBlock < maxBlock ? batchEndBlock : maxBlock;
       }
-
       const data = await getEvents(
         {
           address: deployedContractData?.address,
@@ -170,23 +155,16 @@ export const useScaffoldEventHistory = <
         publicClient,
         { blockData, transactionData, receiptData },
       );
-
       setLastFetchedBlock(batchToBlock || blockNumber || 0n);
-
       return data;
     },
-    enabled: enabled && isContractAddressAndClientReady && !isPollingActive, // Disable when polling starts
+    enabled: enabled && isContractAddressAndClientReady && !isPollingActive,
     initialPageParam: fromBlockValue,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
       if (!blockNumber || fromBlockValue >= blockNumber) return undefined;
-
       const nextBlock = lastPageParam + BigInt(blocksBatchSize);
-
-      // Don't go beyond the specified toBlock or current block
       const maxBlock = toBlock && toBlock < blockNumber ? toBlock : blockNumber;
-
       if (nextBlock > maxBlock) return undefined;
-
       return nextBlock;
     },
     select: data => {
@@ -197,22 +175,16 @@ export const useScaffoldEventHistory = <
         TTransactionData,
         TReceiptData
       >;
-
       return {
         pages: events?.reverse(),
         pageParams: data.pageParams,
       };
     },
   });
-
-  // Check if we're caught up and should start polling
   const shouldStartPolling = () => {
     if (!watch || !blockNumber || isPollingActive) return false;
-
     return !query.hasNextPage && query.status === "success";
   };
-
-  // Poll for new events when watch mode is enabled
   useQuery({
     queryKey: ["liveEvents", contractName, eventName, blockNumber?.toString(), lastFetchedBlock?.toString()],
     enabled: Boolean(
@@ -220,17 +192,12 @@ export const useScaffoldEventHistory = <
     ),
     queryFn: async () => {
       if (!isContractAddressAndClientReady || !blockNumber) return null;
-
       if (!isPollingActive && shouldStartPolling()) {
         setIsPollingActive(true);
       }
-
       const maxBlock = toBlock && toBlock < blockNumber ? toBlock : blockNumber;
       const startBlock = lastFetchedBlock || maxBlock;
-
-      // Only fetch if there are new blocks to check
       if (startBlock >= maxBlock) return null;
-
       const newEvents = await getEvents(
         {
           address: deployedContractData?.address,
@@ -242,18 +209,14 @@ export const useScaffoldEventHistory = <
         publicClient,
         { blockData, transactionData, receiptData },
       );
-
       if (newEvents && newEvents.length > 0) {
         setLiveEvents(prev => [...newEvents, ...prev]);
       }
-
       setLastFetchedBlock(maxBlock);
       return newEvents;
     },
     refetchInterval: false,
   });
-
-  // Manual trigger to fetch next page when previous page completes (only when not polling)
   useEffect(() => {
     if (
       !isPollingActive &&
@@ -265,12 +228,8 @@ export const useScaffoldEventHistory = <
       query.fetchNextPage();
     }
   }, [query, isPollingActive]);
-
-  // Combine historical data from infinite query with live events from watch hook
   const historicalEvents = query.data?.pages || [];
   const allEvents = [...liveEvents, ...historicalEvents] as typeof historicalEvents;
-
-  // remove duplicates
   const seenEvents = new Set<string>();
   const combinedEvents = allEvents.filter(event => {
     const eventKey = `${event?.transactionHash}-${event?.logIndex}-${event?.blockHash}`;
@@ -280,7 +239,6 @@ export const useScaffoldEventHistory = <
     seenEvents.add(eventKey);
     return true;
   }) as typeof historicalEvents;
-
   return {
     data: combinedEvents,
     status: query.status,
