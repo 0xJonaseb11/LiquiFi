@@ -26,3 +26,6 @@ dist
 .cursor/
 .claude/
 .agents/
+INTERVIEW_PREP.md
+AGENTS.md
+CLAUDE.md
