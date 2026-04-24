@@ -11,12 +11,7 @@ import "./interfaces/IInterestRateModel.sol";
 /// @dev Follows the jump rate model pattern used by Compound/Aave:
 ///      - Below optimal utilization: gentle linear slope (slope1)
 ///      - Above optimal utilization: steep linear slope (slope2) to incentivize deposits
-contract InterestRateModel is
-    Initializable,
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    IInterestRateModel
-{
+contract InterestRateModel is Initializable, UUPSUpgradeable, OwnableUpgradeable, IInterestRateModel {
     // ──────────────────────────────────────────────
     //  Custom Errors (gas-efficient over require strings)
     // ──────────────────────────────────────────────
@@ -58,12 +53,7 @@ contract InterestRateModel is
     //  Events
     // ──────────────────────────────────────────────
 
-    event RateParamsUpdated(
-        uint256 baseRate,
-        uint256 slope1,
-        uint256 slope2,
-        uint256 optimalUtilization
-    );
+    event RateParamsUpdated(uint256 baseRate, uint256 slope1, uint256 slope2, uint256 optimalUtilization);
 
     // ──────────────────────────────────────────────
     //  Initializer (replaces constructor for UUPS)
@@ -107,27 +97,18 @@ contract InterestRateModel is
     // ──────────────────────────────────────────────
 
     /// @inheritdoc IInterestRateModel
-    function getUtilization(
-        uint256 totalDeposits,
-        uint256 totalBorrows
-    ) public pure override returns (uint256) {
+    function getUtilization(uint256 totalDeposits, uint256 totalBorrows) public pure override returns (uint256) {
         if (totalDeposits == 0) return 0;
         return (totalBorrows * PRECISION) / totalDeposits;
     }
 
     /// @inheritdoc IInterestRateModel
-    function getBorrowRate(
-        uint256 totalDeposits,
-        uint256 totalBorrows
-    ) external view override returns (uint256) {
+    function getBorrowRate(uint256 totalDeposits, uint256 totalBorrows) external view override returns (uint256) {
         return _getBorrowRatePerSecond(totalDeposits, totalBorrows);
     }
 
     /// @inheritdoc IInterestRateModel
-    function getSupplyRate(
-        uint256 totalDeposits,
-        uint256 totalBorrows
-    ) external view override returns (uint256) {
+    function getSupplyRate(uint256 totalDeposits, uint256 totalBorrows) external view override returns (uint256) {
         uint256 borrowRate = _getBorrowRatePerSecond(totalDeposits, totalBorrows);
         uint256 utilization = getUtilization(totalDeposits, totalBorrows);
 
@@ -136,10 +117,7 @@ contract InterestRateModel is
     }
 
     /// @notice Get the annualized borrow rate for display purposes
-    function getBorrowRateAPR(
-        uint256 totalDeposits,
-        uint256 totalBorrows
-    ) external view returns (uint256) {
+    function getBorrowRateAPR(uint256 totalDeposits, uint256 totalBorrows) external view returns (uint256) {
         return _getBorrowRatePerSecond(totalDeposits, totalBorrows) * SECONDS_PER_YEAR;
     }
 
@@ -172,24 +150,18 @@ contract InterestRateModel is
     /// @dev Core rate calculation: jump rate model
     ///      If utilization <= optimal: rate = baseRate + (utilization / optimal) * slope1
     ///      If utilization >  optimal: rate = baseRate + slope1 + ((utilization - optimal) / (1 - optimal)) * slope2
-    function _getBorrowRatePerSecond(
-        uint256 totalDeposits,
-        uint256 totalBorrows
-    ) internal view returns (uint256) {
+    function _getBorrowRatePerSecond(uint256 totalDeposits, uint256 totalBorrows) internal view returns (uint256) {
         uint256 utilization = getUtilization(totalDeposits, totalBorrows);
         uint256 annualRate;
 
         if (utilization <= optimalUtilization) {
             // Linear ramp: base + proportional slope1
-            annualRate = baseRatePerYear +
-                (utilization * slope1) / optimalUtilization;
+            annualRate = baseRatePerYear + (utilization * slope1) / optimalUtilization;
         } else {
             // Above kink: base + full slope1 + excess * slope2
             uint256 excessUtilization = utilization - optimalUtilization;
             uint256 remainingUtilization = PRECISION - optimalUtilization;
-            annualRate = baseRatePerYear +
-                slope1 +
-                (excessUtilization * slope2) / remainingUtilization;
+            annualRate = baseRatePerYear + slope1 + (excessUtilization * slope2) / remainingUtilization;
         }
 
         // Convert annual rate to per-second rate

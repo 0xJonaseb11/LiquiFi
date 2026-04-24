@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { parseEther, parseUnits } from "viem";
+import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 export const AdminPanel = () => {
   const [ethPrice, setEthPrice] = useState("2000");
@@ -77,13 +77,9 @@ export const AdminPanel = () => {
               placeholder="2000"
               className="input input-bordered input-sm flex-1"
               value={ethPrice}
-              onChange={(e) => setEthPrice(e.target.value)}
+              onChange={e => setEthPrice(e.target.value)}
             />
-            <button
-              className="btn btn-warning btn-sm"
-              onClick={handleSetPrice}
-              disabled={oraclePending}
-            >
+            <button className="btn btn-warning btn-sm" onClick={handleSetPrice} disabled={oraclePending}>
               {oraclePending ? "..." : "Set"}
             </button>
           </div>
@@ -99,7 +95,7 @@ export const AdminPanel = () => {
             placeholder="Borrower address"
             className="input input-bordered input-sm mb-1"
             value={liquidateAddr}
-            onChange={(e) => setLiquidateAddr(e.target.value)}
+            onChange={e => setLiquidateAddr(e.target.value)}
           />
           <div className="flex gap-2">
             <input
@@ -107,13 +103,9 @@ export const AdminPanel = () => {
               placeholder="USDC amount"
               className="input input-bordered input-sm flex-1"
               value={liquidateAmount}
-              onChange={(e) => setLiquidateAmount(e.target.value)}
+              onChange={e => setLiquidateAmount(e.target.value)}
             />
-            <button
-              className="btn btn-error btn-sm"
-              onClick={handleLiquidate}
-              disabled={poolPending}
-            >
+            <button className="btn btn-error btn-sm" onClick={handleLiquidate} disabled={poolPending}>
               {poolPending ? "..." : "⚡ Liquidate"}
             </button>
           </div>
@@ -130,13 +122,9 @@ export const AdminPanel = () => {
               placeholder="75"
               className="input input-bordered input-sm flex-1"
               value={newLtv}
-              onChange={(e) => setNewLtv(e.target.value)}
+              onChange={e => setNewLtv(e.target.value)}
             />
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={handleSetLTV}
-              disabled={poolPending}
-            >
+            <button className="btn btn-primary btn-sm" onClick={handleSetLTV} disabled={poolPending}>
               {poolPending ? "..." : "Set"}
             </button>
           </div>

@@ -10,7 +10,7 @@ interface ILendingPool {
 
     struct Position {
         uint256 collateralAmount; // WETH deposited (18 decimals)
-        uint256 debtAmount;       // USDC borrowed (6 decimals), scaled to 18 internally
+        uint256 debtAmount; // USDC borrowed (6 decimals), scaled to 18 internally
         uint256 lastUpdateTimestamp;
     }
 

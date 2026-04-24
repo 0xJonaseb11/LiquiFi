@@ -9,12 +9,7 @@ import "./interfaces/IPriceOracle.sol";
 /// @title PriceOracle
 /// @notice Mock price oracle with admin-settable prices for testing
 /// @dev Production version would wrap Chainlink AggregatorV3Interface
-contract PriceOracle is
-    Initializable,
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    IPriceOracle
-{
+contract PriceOracle is Initializable, UUPSUpgradeable, OwnableUpgradeable, IPriceOracle {
     // ──────────────────────────────────────────────
     //  Custom Errors
     // ──────────────────────────────────────────────
@@ -84,10 +79,7 @@ contract PriceOracle is
     /// @notice Batch set prices for multiple assets
     /// @param assets Array of token addresses
     /// @param prices Array of USD prices with 8 decimals
-    function setPrices(
-        address[] calldata assets,
-        uint256[] calldata prices
-    ) external onlyOwner {
+    function setPrices(address[] calldata assets, uint256[] calldata prices) external onlyOwner {
         uint256 len = assets.length;
         for (uint256 i; i < len; ) {
             if (assets[i] == address(0)) revert ZeroAddress();
@@ -98,7 +90,9 @@ contract PriceOracle is
 
             emit PriceSet(assets[i], prices[i], block.timestamp);
 
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -114,9 +108,7 @@ contract PriceOracle is
     }
 
     /// @inheritdoc IPriceOracle
-    function getPriceWithTimestamp(
-        address asset
-    ) external view override returns (uint256 price, uint256 updatedAt) {
+    function getPriceWithTimestamp(address asset) external view override returns (uint256 price, uint256 updatedAt) {
         price = _prices[asset];
         if (price == 0) revert PriceNotSet(asset);
         updatedAt = _updatedAt[asset];

@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import type { NextPage } from "next";
-import { useAccount } from "wagmi";
 import { Address } from "@scaffold-ui/components";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
+import type { NextPage } from "next";
 import { hardhat } from "viem/chains";
+import { useAccount } from "wagmi";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
@@ -20,12 +20,8 @@ const Home: NextPage = () => {
             <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               LiquiFi
             </h1>
-            <p className="py-2 text-xl opacity-70">
-              DeFi Lending Protocol with AI-Powered Liquidation Engine
-            </p>
-            <p className="text-sm opacity-50 mb-6">
-              Cross-chain liquidation • AI risk scoring • Real-time monitoring
-            </p>
+            <p className="py-2 text-xl opacity-70">DeFi Lending Protocol with AI-Powered Liquidation Engine</p>
+            <p className="text-sm opacity-50 mb-6">Cross-chain liquidation • AI risk scoring • Real-time monitoring</p>
 
             {connectedAddress ? (
               <div className="flex flex-col items-center gap-4">
@@ -35,9 +31,7 @@ const Home: NextPage = () => {
                     address={connectedAddress}
                     chain={targetNetwork}
                     blockExplorerAddressLink={
-                      targetNetwork.id === hardhat.id
-                        ? `/blockexplorer/address/${connectedAddress}`
-                        : undefined
+                      targetNetwork.id === hardhat.id ? `/blockexplorer/address/${connectedAddress}` : undefined
                     }
                   />
                 </div>
@@ -71,8 +65,8 @@ const Home: NextPage = () => {
               <div className="card-body">
                 <h3 className="card-title text-primary">🏦 Lending Pool</h3>
                 <p className="text-sm opacity-70">
-                  Deposit WETH collateral, borrow USDC with 75% LTV.
-                  Utilization-based interest rates with jump rate model.
+                  Deposit WETH collateral, borrow USDC with 75% LTV. Utilization-based interest rates with jump rate
+                  model.
                 </p>
               </div>
             </div>
@@ -80,8 +74,7 @@ const Home: NextPage = () => {
               <div className="card-body">
                 <h3 className="card-title text-secondary">⚡ Liquidation Engine</h3>
                 <p className="text-sm opacity-70">
-                  Automated bot monitors health factors. Executes optimal
-                  partial liquidations with gas management.
+                  Automated bot monitors health factors. Executes optimal partial liquidations with gas management.
                 </p>
               </div>
             </div>
@@ -89,8 +82,8 @@ const Home: NextPage = () => {
               <div className="card-body">
                 <h3 className="card-title text-accent">🌉 Cross-Chain</h3>
                 <p className="text-sm opacity-70">
-                  LayerZero-powered cross-chain fund sourcing for liquidations.
-                  State machine with retry & dead-letter queues.
+                  LayerZero-powered cross-chain fund sourcing for liquidations. State machine with retry & dead-letter
+                  queues.
                 </p>
               </div>
             </div>
@@ -98,8 +91,8 @@ const Home: NextPage = () => {
               <div className="card-body">
                 <h3 className="card-title text-info">🤖 AI Risk Scoring</h3>
                 <p className="text-sm opacity-70">
-                  GPT-powered market risk assessment. Dynamically adjusts
-                  liquidation thresholds based on sentiment analysis.
+                  GPT-powered market risk assessment. Dynamically adjusts liquidation thresholds based on sentiment
+                  analysis.
                 </p>
               </div>
             </div>

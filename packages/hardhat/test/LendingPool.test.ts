@@ -18,8 +18,8 @@ describe("LiquiFi Lending Protocol", function () {
   let lendingPool: Contract;
 
   // Constants
-  const ETH_PRICE = 2000_00000000n;  // $2,000 (8 dec)
-  const USDC_PRICE = 1_00000000n;    // $1.00 (8 dec)
+  const ETH_PRICE = 2000_00000000n; // $2,000 (8 dec)
+  const USDC_PRICE = 1_00000000n; // $1.00 (8 dec)
   const PRECISION = ethers.parseEther("1");
 
   beforeEach(async function () {
@@ -39,7 +39,9 @@ describe("LiquiFi Lending Protocol", function () {
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
     const oracleImpl = await PriceOracle.deploy();
     const oracleInitData = oracleImpl.interface.encodeFunctionData("initialize", [deployerAddr]);
-    const Proxy = await ethers.getContractFactory("@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy");
+    const Proxy = await ethers.getContractFactory(
+      "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy",
+    );
     const oracleProxy = await Proxy.deploy(await oracleImpl.getAddress(), oracleInitData);
     oracle = PriceOracle.attach(await oracleProxy.getAddress());
 
@@ -47,11 +49,11 @@ describe("LiquiFi Lending Protocol", function () {
     const InterestRateModel = await ethers.getContractFactory("InterestRateModel");
     const irmImpl = await InterestRateModel.deploy();
     const irmInitData = irmImpl.interface.encodeFunctionData("initialize", [
-      ethers.parseEther("0.02"),  // 2% base
-      ethers.parseEther("0.10"),  // 10% slope1
-      ethers.parseEther("1.00"),  // 100% slope2
-      ethers.parseEther("0.80"),  // 80% optimal
-      ethers.parseEther("0.10"),  // 10% reserve
+      ethers.parseEther("0.02"), // 2% base
+      ethers.parseEther("0.10"), // 10% slope1
+      ethers.parseEther("1.00"), // 100% slope2
+      ethers.parseEther("0.80"), // 80% optimal
+      ethers.parseEther("0.10"), // 10% reserve
       deployerAddr,
     ]);
     const irmProxy = await Proxy.deploy(await irmImpl.getAddress(), irmInitData);
@@ -65,9 +67,9 @@ describe("LiquiFi Lending Protocol", function () {
       await usdc.getAddress(),
       await oracle.getAddress(),
       await interestModel.getAddress(),
-      ethers.parseEther("0.75"),  // 75% LTV
-      ethers.parseEther("0.50"),  // 50% close factor
-      ethers.parseEther("0.05"),  // 5% liquidation incentive
+      ethers.parseEther("0.75"), // 75% LTV
+      ethers.parseEther("0.50"), // 50% close factor
+      ethers.parseEther("0.05"), // 5% liquidation incentive
       deployerAddr,
     ]);
     const poolProxy = await Proxy.deploy(await poolImpl.getAddress(), poolInitData);
@@ -78,9 +80,9 @@ describe("LiquiFi Lending Protocol", function () {
     await oracle.setPrice(await usdc.getAddress(), USDC_PRICE);
 
     // Mint tokens
-    await weth.mint(borrowerAddr, ethers.parseEther("100"));     // 100 WETH
-    await usdc.mint(deployerAddr, 10_000_000_000000n);            // 10M USDC
-    await usdc.mint(liquidatorAddr, 1_000_000_000000n);           // 1M USDC
+    await weth.mint(borrowerAddr, ethers.parseEther("100")); // 100 WETH
+    await usdc.mint(deployerAddr, 10_000_000_000000n); // 10M USDC
+    await usdc.mint(liquidatorAddr, 1_000_000_000000n); // 1M USDC
 
     // Seed pool with USDC liquidity
     await usdc.connect(deployer).approve(await lendingPool.getAddress(), 5_000_000_000000n);
@@ -103,9 +105,7 @@ describe("LiquiFi Lending Protocol", function () {
     });
 
     it("should revert on zero deposit", async function () {
-      await expect(
-        lendingPool.connect(borrower).deposit(0)
-      ).to.be.revertedWithCustomError(lendingPool, "ZeroAmount");
+      await expect(lendingPool.connect(borrower).deposit(0)).to.be.revertedWithCustomError(lendingPool, "ZeroAmount");
     });
   });
 
@@ -126,9 +126,10 @@ describe("LiquiFi Lending Protocol", function () {
       // Borrow first
       await lendingPool.connect(borrower).borrow(10_000_000000n); // 10k USDC
       // Try to withdraw too much collateral
-      await expect(
-        lendingPool.connect(borrower).withdraw(ethers.parseEther("9"))
-      ).to.be.revertedWithCustomError(lendingPool, "WithdrawWouldBreachLTV");
+      await expect(lendingPool.connect(borrower).withdraw(ethers.parseEther("9"))).to.be.revertedWithCustomError(
+        lendingPool,
+        "WithdrawWouldBreachLTV",
+      );
     });
   });
 
@@ -155,9 +156,10 @@ describe("LiquiFi Lending Protocol", function () {
     it("should revert borrow exceeding LTV", async function () {
       // 10 WETH * $2000 * 75% = $15,000 max → try $16,000
       const borrowAmount = 16_000_000000n;
-      await expect(
-        lendingPool.connect(borrower).borrow(borrowAmount)
-      ).to.be.revertedWithCustomError(lendingPool, "BorrowExceedsLTV");
+      await expect(lendingPool.connect(borrower).borrow(borrowAmount)).to.be.revertedWithCustomError(
+        lendingPool,
+        "BorrowExceedsLTV",
+      );
     });
 
     it("should track health factor correctly", async function () {
@@ -204,7 +206,7 @@ describe("LiquiFi Lending Protocol", function () {
     it("should revert liquidation on healthy position", async function () {
       await usdc.connect(liquidator).approve(await lendingPool.getAddress(), 7_000_000000n);
       await expect(
-        lendingPool.connect(liquidator).liquidate(borrowerAddr, 7_000_000000n)
+        lendingPool.connect(liquidator).liquidate(borrowerAddr, 7_000_000000n),
       ).to.be.revertedWithCustomError(lendingPool, "PositionHealthy");
     });
 
@@ -220,9 +222,10 @@ describe("LiquiFi Lending Protocol", function () {
       const repayAmount = 7_000_000000n;
       await usdc.connect(liquidator).approve(await lendingPool.getAddress(), repayAmount);
 
-      await expect(
-        lendingPool.connect(liquidator).liquidate(borrowerAddr, repayAmount)
-      ).to.emit(lendingPool, "Liquidation");
+      await expect(lendingPool.connect(liquidator).liquidate(borrowerAddr, repayAmount)).to.emit(
+        lendingPool,
+        "Liquidation",
+      );
 
       // Health factor should improve after liquidation
       const hfAfter = await lendingPool.getHealthFactor(borrowerAddr);
@@ -236,9 +239,10 @@ describe("LiquiFi Lending Protocol", function () {
       const repayAmount = 10_000_000000n; // Over the 7k limit
       await usdc.connect(liquidator).approve(await lendingPool.getAddress(), repayAmount);
 
-      await expect(
-        lendingPool.connect(liquidator).liquidate(borrowerAddr, repayAmount)
-      ).to.be.revertedWithCustomError(lendingPool, "ExceedsCloseFactor");
+      await expect(lendingPool.connect(liquidator).liquidate(borrowerAddr, repayAmount)).to.be.revertedWithCustomError(
+        lendingPool,
+        "ExceedsCloseFactor",
+      );
     });
 
     it("should prevent self-liquidation", async function () {
@@ -246,9 +250,10 @@ describe("LiquiFi Lending Protocol", function () {
       await usdc.mint(borrowerAddr, 7_000_000000n);
       await usdc.connect(borrower).approve(await lendingPool.getAddress(), 7_000_000000n);
 
-      await expect(
-        lendingPool.connect(borrower).liquidate(borrowerAddr, 7_000_000000n)
-      ).to.be.revertedWithCustomError(lendingPool, "SelfLiquidation");
+      await expect(lendingPool.connect(borrower).liquidate(borrowerAddr, 7_000_000000n)).to.be.revertedWithCustomError(
+        lendingPool,
+        "SelfLiquidation",
+      );
     });
   });
 
@@ -287,7 +292,7 @@ describe("LiquiFi Lending Protocol", function () {
   describe("InterestRateModel", function () {
     it("should return higher rate above optimal utilization", async function () {
       const deposits = ethers.parseEther("100");
-      const lowBorrow = ethers.parseEther("50");  // 50% util (below 80%)
+      const lowBorrow = ethers.parseEther("50"); // 50% util (below 80%)
       const highBorrow = ethers.parseEther("90"); // 90% util (above 80%)
 
       const lowRate = await interestModel.getBorrowRate(deposits, lowBorrow);
@@ -315,9 +320,7 @@ describe("LiquiFi Lending Protocol", function () {
 
     it("should revert for unset price", async function () {
       const randomAddr = "0x0000000000000000000000000000000000000042";
-      await expect(
-        oracle.getPrice(randomAddr)
-      ).to.be.revertedWithCustomError(oracle, "PriceNotSet");
+      await expect(oracle.getPrice(randomAddr)).to.be.revertedWithCustomError(oracle, "PriceNotSet");
     });
 
     it("should batch set prices", async function () {
@@ -339,9 +342,7 @@ describe("LiquiFi Lending Protocol", function () {
       await lendingPool.connect(deployer).pause();
 
       await weth.connect(borrower).approve(await lendingPool.getAddress(), ethers.parseEther("1"));
-      await expect(
-        lendingPool.connect(borrower).deposit(ethers.parseEther("1"))
-      ).to.be.reverted; // EnforcedPause
+      await expect(lendingPool.connect(borrower).deposit(ethers.parseEther("1"))).to.be.reverted; // EnforcedPause
 
       await lendingPool.connect(deployer).unpause();
 

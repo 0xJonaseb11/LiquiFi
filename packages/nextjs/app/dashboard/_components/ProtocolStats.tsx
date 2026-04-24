@@ -1,7 +1,7 @@
 "use client";
 
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { formatEther, formatUnits } from "viem";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 export const ProtocolStats = () => {
   const { data: totalDeposits } = useScaffoldReadContract({
@@ -50,9 +50,7 @@ export const ProtocolStats = () => {
     },
     {
       label: "Borrow Rate",
-      value: borrowRate
-        ? `${(parseFloat(formatEther(borrowRate)) * 365.25 * 24 * 3600 * 100).toFixed(2)}% APR`
-        : "—",
+      value: borrowRate ? `${(parseFloat(formatEther(borrowRate)) * 365.25 * 24 * 3600 * 100).toFixed(2)}% APR` : "—",
       icon: "📈",
       color: "text-primary",
     },
@@ -66,7 +64,7 @@ export const ProtocolStats = () => {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      {stats.map((stat) => (
+      {stats.map(stat => (
         <div key={stat.label} className="card bg-base-100 shadow-md">
           <div className="card-body p-4">
             <div className="flex items-center gap-2">

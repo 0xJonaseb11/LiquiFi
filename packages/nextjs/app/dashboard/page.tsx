@@ -1,11 +1,11 @@
 "use client";
 
-import type { NextPage } from "next";
-import { ProtocolStats } from "./_components/ProtocolStats";
-import { PositionsTable } from "./_components/PositionsTable";
 import { AdminPanel } from "./_components/AdminPanel";
-import { RiskScoreWidget } from "./_components/RiskScoreWidget";
 import { DepositBorrowPanel } from "./_components/DepositBorrowPanel";
+import { PositionsTable } from "./_components/PositionsTable";
+import { ProtocolStats } from "./_components/ProtocolStats";
+import { RiskScoreWidget } from "./_components/RiskScoreWidget";
+import type { NextPage } from "next";
 
 const Dashboard: NextPage = () => {
   return (

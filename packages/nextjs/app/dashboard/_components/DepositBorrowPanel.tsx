@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { formatEther, formatUnits, parseEther, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
-import { parseEther, parseUnits, formatEther, formatUnits } from "viem";
 
 export const DepositBorrowPanel = () => {
   const { address } = useAccount();
@@ -86,10 +86,7 @@ export const DepositBorrowPanel = () => {
       const amount = parseUnits(repayAmount, 6);
       await writeMockUSDC({
         functionName: "approve",
-        args: [
-          "0x0000000000000000000000000000000000000000",
-          amount,
-        ],
+        args: ["0x0000000000000000000000000000000000000000", amount],
       });
       await writePool({
         functionName: "repay",
@@ -149,7 +146,7 @@ export const DepositBorrowPanel = () => {
 
         {/* Action Tabs */}
         <div className="tabs tabs-boxed mt-2">
-          {(["deposit", "borrow", "repay", "withdraw"] as const).map((tab) => (
+          {(["deposit", "borrow", "repay", "withdraw"] as const).map(tab => (
             <button
               key={tab}
               className={`tab tab-sm ${activeTab === tab ? "tab-active" : ""}`}
@@ -169,7 +166,7 @@ export const DepositBorrowPanel = () => {
                 placeholder="WETH amount"
                 className="input input-bordered input-sm flex-1"
                 value={depositAmount}
-                onChange={(e) => setDepositAmount(e.target.value)}
+                onChange={e => setDepositAmount(e.target.value)}
               />
               <button className="btn btn-success btn-sm" onClick={handleDeposit} disabled={poolPending}>
                 {poolPending ? "..." : "Deposit"}
@@ -184,17 +181,13 @@ export const DepositBorrowPanel = () => {
                   placeholder="USDC amount"
                   className="input input-bordered input-sm flex-1"
                   value={borrowAmount}
-                  onChange={(e) => setBorrowAmount(e.target.value)}
+                  onChange={e => setBorrowAmount(e.target.value)}
                 />
                 <button className="btn btn-warning btn-sm" onClick={handleBorrow} disabled={poolPending}>
                   {poolPending ? "..." : "Borrow"}
                 </button>
               </div>
-              {maxBorrow && (
-                <span className="text-xs opacity-50">
-                  Max: {formatUnits(maxBorrow, 6)} USDC
-                </span>
-              )}
+              {maxBorrow && <span className="text-xs opacity-50">Max: {formatUnits(maxBorrow, 6)} USDC</span>}
             </div>
           )}
           {activeTab === "repay" && (
@@ -204,7 +197,7 @@ export const DepositBorrowPanel = () => {
                 placeholder="USDC amount"
                 className="input input-bordered input-sm flex-1"
                 value={repayAmount}
-                onChange={(e) => setRepayAmount(e.target.value)}
+                onChange={e => setRepayAmount(e.target.value)}
               />
               <button className="btn btn-info btn-sm" onClick={handleRepay} disabled={poolPending}>
                 {poolPending ? "..." : "Repay"}
@@ -218,7 +211,7 @@ export const DepositBorrowPanel = () => {
                 placeholder="WETH amount"
                 className="input input-bordered input-sm flex-1"
                 value={withdrawAmount}
-                onChange={(e) => setWithdrawAmount(e.target.value)}
+                onChange={e => setWithdrawAmount(e.target.value)}
               />
               <button className="btn btn-accent btn-sm" onClick={handleWithdraw} disabled={poolPending}>
                 {poolPending ? "..." : "Withdraw"}

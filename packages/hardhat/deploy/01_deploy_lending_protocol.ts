@@ -175,8 +175,8 @@ const deployLendingProtocol: DeployFunction = async function (hre: HardhatRuntim
 
   // Set initial oracle prices
   const oracleContract = await hre.ethers.getContractAt("PriceOracle", priceOracle.address, signer);
-  const ethPrice = 2000_00000000n;  // $2,000.00 (8 decimals)
-  const usdcPrice = 1_00000000n;    // $1.00 (8 decimals)
+  const ethPrice = 2000_00000000n; // $2,000.00 (8 decimals)
+  const usdcPrice = 1_00000000n; // $1.00 (8 decimals)
 
   const gasEstimate1 = await oracleContract.setPrice.estimateGas(mockWETH.address, ethPrice);
   await oracleContract.setPrice(mockWETH.address, ethPrice, { gasLimit: (gasEstimate1 * 120n) / 100n });
@@ -190,8 +190,8 @@ const deployLendingProtocol: DeployFunction = async function (hre: HardhatRuntim
   const wethContract = await hre.ethers.getContractAt("MockWETH", mockWETH.address, signer);
   const usdcContract = await hre.ethers.getContractAt("MockUSDC", mockUSDC.address, signer);
 
-  const mintWETH = ethers.parseEther("1000");       // 1000 WETH
-  const mintUSDC = 10_000_000_000000n;               // 10M USDC (6 decimals)
+  const mintWETH = ethers.parseEther("1000"); // 1000 WETH
+  const mintUSDC = 10_000_000_000000n; // 10M USDC (6 decimals)
 
   await wethContract.mint(deployer, mintWETH, { gasLimit: 100_000 });
   await usdcContract.mint(deployer, mintUSDC, { gasLimit: 100_000 });

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-import { formatEther } from "viem";
+import { useEffect, useState } from "react";
 import { Address } from "@scaffold-ui/components";
+import { formatEther } from "viem";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 
 type PositionRow = {
@@ -30,7 +30,7 @@ export const PositionsTable = () => {
   const indices = Array.from({ length: Math.min(count, 20) }, (_, i) => i);
 
   // Individual borrower reads
-  const borrowerReads = indices.map((i) => {
+  const borrowerReads = indices.map(i => {
     const { data } = useScaffoldReadContract({
       contractName: "LendingPool",
       functionName: "getBorrowerAt",
@@ -40,7 +40,7 @@ export const PositionsTable = () => {
   });
 
   // Fetch positions for each borrower
-  const positionReads = borrowerReads.map((addr) => {
+  const positionReads = borrowerReads.map(addr => {
     const { data: position } = useScaffoldReadContract({
       contractName: "LendingPool",
       functionName: "getPosition",
@@ -101,7 +101,7 @@ export const PositionsTable = () => {
                   </td>
                 </tr>
               ) : (
-                positions.map((pos) => (
+                positions.map(pos => (
                   <tr key={pos.address} className="hover">
                     <td>
                       <Address address={pos.address} chain={targetNetwork} />

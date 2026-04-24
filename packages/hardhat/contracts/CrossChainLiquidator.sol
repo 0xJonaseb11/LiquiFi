@@ -13,12 +13,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 /// @dev In local/test mode, this uses direct calls instead of actual cross-chain messages.
 ///      Production would integrate with LayerZero's ILayerZeroEndpoint for real message passing.
 ///      State machine: PENDING → BRIDGING → CONFIRMING → EXECUTING → COMPLETE | FAILED
-contract CrossChainLiquidator is
-    Initializable,
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    ReentrancyGuardUpgradeable
-{
+contract CrossChainLiquidator is Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
 
     // ──────────────────────────────────────────────
@@ -38,21 +33,21 @@ contract CrossChainLiquidator is
 
     enum CrossChainState {
         NONE,
-        PENDING,     // Request created, awaiting bridge initiation
-        BRIDGING,    // Funds being bridged from source chain
-        CONFIRMING,  // Bridge TX confirmed, awaiting funds arrival
-        EXECUTING,   // Liquidation being executed on target chain
-        COMPLETE,    // Successfully completed
-        FAILED       // Failed after max retries → dead letter queue
+        PENDING, // Request created, awaiting bridge initiation
+        BRIDGING, // Funds being bridged from source chain
+        CONFIRMING, // Bridge TX confirmed, awaiting funds arrival
+        EXECUTING, // Liquidation being executed on target chain
+        COMPLETE, // Successfully completed
+        FAILED // Failed after max retries → dead letter queue
     }
 
     struct LiquidationRequest {
         uint256 id;
-        address borrower;          // Target borrower on this chain
-        uint256 repayAmount;       // USDC amount needed for liquidation
-        uint16 sourceChainId;      // LayerZero chain ID of fund source
+        address borrower; // Target borrower on this chain
+        uint256 repayAmount; // USDC amount needed for liquidation
+        uint16 sourceChainId; // LayerZero chain ID of fund source
         uint256 createdAt;
-        uint256 deadline;          // Auto-expire timestamp
+        uint256 deadline; // Auto-expire timestamp
         uint8 retryCount;
         CrossChainState state;
     }
@@ -93,7 +88,12 @@ contract CrossChainLiquidator is
     //  Events
     // ──────────────────────────────────────────────
 
-    event CrossChainLiquidationRequested(uint256 indexed requestId, address borrower, uint256 repayAmount, uint16 sourceChain);
+    event CrossChainLiquidationRequested(
+        uint256 indexed requestId,
+        address borrower,
+        uint256 repayAmount,
+        uint16 sourceChain
+    );
     event CrossChainStateChanged(uint256 indexed requestId, CrossChainState from, CrossChainState to);
     event CrossChainLiquidationComplete(uint256 indexed requestId, address borrower, uint256 repayAmount);
     event CrossChainLiquidationFailed(uint256 indexed requestId, string reason);
@@ -142,7 +142,9 @@ contract CrossChainLiquidator is
         uint16 sourceChainId
     ) external onlyOwner nonReentrant returns (uint256 requestId) {
         requestId = nextRequestId;
-        unchecked { ++nextRequestId; }
+        unchecked {
+            ++nextRequestId;
+        }
 
         requests[requestId] = LiquidationRequest({
             id: requestId,
@@ -190,11 +192,7 @@ contract CrossChainLiquidator is
         // Call the lending pool's liquidate function
         // Using low-level call to handle revert gracefully
         (bool success, bytes memory returnData) = lendingPool.call(
-            abi.encodeWithSignature(
-                "liquidate(address,uint256)",
-                req.borrower,
-                req.repayAmount
-            )
+            abi.encodeWithSignature("liquidate(address,uint256)", req.borrower, req.repayAmount)
         );
 
         if (success) {
@@ -214,7 +212,9 @@ contract CrossChainLiquidator is
         }
         if (req.retryCount >= MAX_RETRIES) revert MaxRetriesExceeded(requestId);
 
-        unchecked { ++req.retryCount; }
+        unchecked {
+            ++req.retryCount;
+        }
         req.deadline = block.timestamp + REQUEST_TIMEOUT;
         req.state = CrossChainState.PENDING;
 
@@ -230,7 +230,7 @@ contract CrossChainLiquidator is
     function lzReceive(
         uint16 _srcChainId,
         bytes calldata _srcAddress,
-        uint64, /* _nonce */
+        uint64 /* _nonce */,
         bytes calldata _payload
     ) external {
         if (msg.sender != lzEndpoint) revert UnauthorizedEndpoint();
@@ -270,11 +270,7 @@ contract CrossChainLiquidator is
     //  Internal
     // ──────────────────────────────────────────────
 
-    function _transitionState(
-        uint256 requestId,
-        CrossChainState expectedFrom,
-        CrossChainState to
-    ) internal {
+    function _transitionState(uint256 requestId, CrossChainState expectedFrom, CrossChainState to) internal {
         CrossChainState current = requests[requestId].state;
         if (current != expectedFrom) revert InvalidState(requestId, current, expectedFrom);
         requests[requestId].state = to;

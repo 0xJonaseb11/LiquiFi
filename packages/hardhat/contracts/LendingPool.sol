@@ -282,10 +282,7 @@ contract LendingPool is
     ///      The close factor limits how much debt can be repaid in one liquidation call.
     /// @param borrower Address of the unhealthy position
     /// @param repayAmount Amount of USDC to repay (6 decimals)
-    function liquidate(
-        address borrower,
-        uint256 repayAmount
-    ) external nonReentrant whenNotPaused {
+    function liquidate(address borrower, uint256 repayAmount) external nonReentrant whenNotPaused {
         if (repayAmount == 0) revert ZeroAmount();
         if (borrower == msg.sender) revert SelfLiquidation();
 
@@ -416,10 +413,7 @@ contract LendingPool is
     }
 
     /// @notice Update liquidation parameters
-    function setLiquidationParams(
-        uint256 _closeFactor,
-        uint256 _liquidationIncentive
-    ) external onlyOwner {
+    function setLiquidationParams(uint256 _closeFactor, uint256 _liquidationIncentive) external onlyOwner {
         if (_closeFactor == 0 || _closeFactor > PRECISION) revert InvalidCloseFactor();
         if (_liquidationIncentive > PRECISION) revert InvalidLiquidationIncentive();
         closeFactor = _closeFactor;
@@ -491,11 +485,11 @@ contract LendingPool is
         // Scale debt by ratio of current index to user's stored index
         uint256 oldDebt = pos.debtAmount;
         pos.debtAmount = (pos.debtAmount * borrowIndex) / userIndex;
-        
+
         // Update totalBorrows with the actual interest applied to this user
         // This keeps totalBorrows exactly in sync with the sum of all debtAmount
         totalBorrows = totalBorrows + pos.debtAmount - oldDebt;
-        
+
         _userBorrowIndex[user] = borrowIndex;
     }
 

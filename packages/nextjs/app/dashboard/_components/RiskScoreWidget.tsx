@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type RiskData = {
   risk_score: number;
@@ -62,9 +62,7 @@ export const RiskScoreWidget = () => {
           <div className="text-xs opacity-60 uppercase">AI Risk Score</div>
           {risk ? (
             <div className="flex items-center gap-3">
-              <span className={`text-3xl font-bold ${getScoreColor(risk.risk_score)}`}>
-                {risk.risk_score}
-              </span>
+              <span className={`text-3xl font-bold ${getScoreColor(risk.risk_score)}`}>{risk.risk_score}</span>
               <span className="text-xs opacity-50">/100</span>
             </div>
           ) : (
@@ -80,9 +78,7 @@ export const RiskScoreWidget = () => {
           {risk && (
             <>
               <span className="badge badge-ghost badge-xs">{risk.source}</span>
-              <span className="opacity-50 mt-1">
-                Threshold: {risk.recommended_threshold.toFixed(2)}
-              </span>
+              <span className="opacity-50 mt-1">Threshold: {risk.recommended_threshold.toFixed(2)}</span>
             </>
           )}
         </div>
