@@ -65,7 +65,7 @@ export const useChainReadContract = (params: { contractName: string; functionNam
     };
 
     queryContract();
-  }, [isEvm, isReady, params.contractName, params.functionName, JSON.stringify(params.args)]); // eslint-disable-line
+  }, [isEvm, isReady, params.contractName, params.functionName, JSON.stringify(params.args, (_k, v) => (typeof v === "bigint" ? v.toString() : v))]); // eslint-disable-line
 
   if (isEvm) {
     return evmResult as any;
