@@ -25,9 +25,9 @@ export const AdminPanel = () => {
   const [incentive, setIncentive] = useState("5");
   const [threshold, setThreshold] = useState("100");
 
-  const { data: collateralInfo } = useDeployedContractInfo(isEvm ? "MockWETH" : "MockWDOT");
-  const { data: usdcInfo } = useDeployedContractInfo("MockUSDC");
-  const { data: poolInfo } = useDeployedContractInfo("LendingPool");
+  const { data: collateralInfo } = useDeployedContractInfo({ contractName: (isEvm ? "MockWETH" : "MockWDOT") as any });
+  const { data: usdcInfo } = useDeployedContractInfo({ contractName: "MockUSDC" });
+  const { data: poolInfo } = useDeployedContractInfo({ contractName: "LendingPool" });
 
   const { writeContractAsync: writeOracle, isPending: oraclePending } = useChainWriteContract({
     contractName: "PriceOracle",
@@ -48,7 +48,7 @@ export const AdminPanel = () => {
 
   const handleSetPrice = async () => {
     try {
-      const ethPrice8 = BigInt(Math.round(parseFloat(ethPrice) * 1e8));
+      const ethPrice8 = BigInt(Math.round(Number.parseFloat(ethPrice) * 1e8));
       const usdcPrice8 = BigInt(1 * 1e8); // USDC is $1
 
       if (collateralInfo?.address) {
@@ -103,7 +103,7 @@ export const AdminPanel = () => {
 
   const handleSetLTV = async () => {
     try {
-      const ltvWei = parseEther((parseFloat(newLtv) / 100).toString());
+      const ltvWei = parseEther((Number.parseFloat(newLtv) / 100).toString());
       await writePool({
         functionName: "setLTV",
         args: [ltvWei],
@@ -115,8 +115,8 @@ export const AdminPanel = () => {
 
   const handleSetLiquidationParams = async () => {
     try {
-      const cfWei = parseEther((parseFloat(closeFactor) / 100).toString());
-      const liWei = parseEther((parseFloat(incentive) / 100).toString());
+      const cfWei = parseEther((Number.parseFloat(closeFactor) / 100).toString());
+      const liWei = parseEther((Number.parseFloat(incentive) / 100).toString());
       await writePool({
         functionName: "setLiquidationParams",
         args: [cfWei, liWei],
@@ -128,7 +128,7 @@ export const AdminPanel = () => {
 
   const handleSetThreshold = async () => {
     try {
-      const thresholdWei = parseEther((parseFloat(threshold) / 100).toString());
+      const thresholdWei = parseEther((Number.parseFloat(threshold) / 100).toString());
       await writePool({
         functionName: "setLiquidationThreshold",
         args: [thresholdWei],

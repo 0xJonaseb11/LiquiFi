@@ -19,7 +19,7 @@ export const useChainReadContract = (params: { contractName: string; functionNam
     contractName: params.contractName as any,
     functionName: params.functionName as any,
     args: params.args as any,
-  });
+  } as any);
 
   // Polkadot path
   const [polkadotData, setPolkadotData] = useState<any>(null);
@@ -91,7 +91,7 @@ export const useChainWriteContract = (params: { contractName: string }) => {
   // EVM path
   const evmResult = useScaffoldWriteContract({
     contractName: params.contractName as any,
-  });
+  } as any);
 
   // Polkadot path
   let contracts: Record<string, any> = {};
