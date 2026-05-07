@@ -68,7 +68,6 @@ const deployLendingProtocol: DeployFunction = async function (hre: HardhatRuntim
 
   console.log("\n📦 Deploying InterestRateModel...");
 
-
   // Rate parameters:
   //   Base rate:    2% APR  = 0.02e18
   //   Slope1:      10% APR = 0.10e18 (below optimal)

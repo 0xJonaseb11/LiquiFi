@@ -268,7 +268,6 @@ describe("LiquiFi Lending Protocol", function () {
       await lendingPool.connect(borrower).deposit(ethers.parseEther("10"));
       await lendingPool.connect(borrower).borrow(10_000_000_000n);
 
-
       // Advance 30 days
       await time.increase(30 * 24 * 60 * 60);
 
