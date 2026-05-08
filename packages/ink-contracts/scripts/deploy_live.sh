@@ -7,9 +7,9 @@ if [ -f .env ]; then
 fi
 
 SURI="${DEPLOYER_SURI:?Set DEPLOYER_SURI in .env}"
-NODE_URL="wss://rpc.shibuya.astar.network"
+NODE_URL="wss://rpc1.popnetwork.io"
 
-echo "🚀 Starting Shibuya Deployment..."
+echo "🚀 Starting Pop Network (Paseo) Deployment..."
 
 # 1. Build All
 echo "📦 Building all contracts..."

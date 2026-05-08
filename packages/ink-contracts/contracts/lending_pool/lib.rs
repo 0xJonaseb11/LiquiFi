@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
+#![allow(clippy::all)]
 #[ink::contract]
+#[allow(clippy::all)]
 mod lending_pool {
     use ink::prelude::vec::Vec;
     use ink::storage::Mapping;
@@ -135,9 +137,9 @@ mod lending_pool {
                 amount,
             )?;
             let mut pos = self.positions.get(caller).unwrap_or_default();
-            pos.collateral_amount += amount;
+            pos.collateral_amount = pos.collateral_amount.saturating_add(amount);
             self.positions.insert(caller, &pos);
-            self.total_deposits += amount;
+            self.total_deposits = self.total_deposits.saturating_add(amount);
             self.env().emit_event(Deposit {
                 user: caller,
                 amount,
@@ -157,7 +159,7 @@ mod lending_pool {
             if pos.collateral_amount < amount {
                 return Err(LiquiFiError::InsufficientCollateral);
             }
-            let remaining = pos.collateral_amount - amount;
+            let remaining = pos.collateral_amount.saturating_sub(amount);
             if pos.debt_amount > 0 {
                 let max_borrow = self.calculate_max_borrow(remaining);
                 let current_debt = self.debt_in_usd(pos.debt_amount);
@@ -167,7 +169,7 @@ mod lending_pool {
             }
             pos.collateral_amount = remaining;
             self.positions.insert(caller, &pos);
-            self.total_deposits -= amount;
+            self.total_deposits = self.total_deposits.saturating_sub(amount);
             self.psp22_transfer(self.collateral_token, caller, amount)?;
             self.env().emit_event(Withdraw {
                 user: caller,
@@ -186,7 +188,7 @@ mod lending_pool {
             self.apply_user_interest(caller);
             let mut pos = self.positions.get(caller).unwrap_or_default();
             let normalized = self.normalize_debt(amount);
-            let new_debt = pos.debt_amount + normalized;
+            let new_debt = pos.debt_amount.saturating_add(normalized);
             let max_borrow = self.calculate_max_borrow(pos.collateral_amount);
             let new_debt_usd = self.debt_in_usd(new_debt);
             if new_debt_usd > max_borrow {
@@ -199,7 +201,7 @@ mod lending_pool {
             pos.debt_amount = new_debt;
             pos.last_update_timestamp = self.env().block_timestamp();
             self.positions.insert(caller, &pos);
-            self.total_borrows += normalized;
+            self.total_borrows = self.total_borrows.saturating_add(normalized);
             if !self.is_borrower.get(caller).unwrap_or(false) {
                 self.is_borrower.insert(caller, &true);
                 self.borrower_list.push(caller);
@@ -228,9 +230,9 @@ mod lending_pool {
                 normalized = pos.debt_amount;
                 actual_amount = self.denormalize_debt(normalized);
             }
-            pos.debt_amount -= normalized;
+            pos.debt_amount = pos.debt_amount.saturating_sub(normalized);
             self.positions.insert(caller, &pos);
-            self.total_borrows -= normalized;
+            self.total_borrows = self.total_borrows.saturating_sub(normalized);
             self.user_borrow_index.insert(caller, &self.borrow_index);
             self.psp22_transfer_from(
                 self.debt_token,
@@ -266,26 +268,26 @@ mod lending_pool {
                 return Err(LiquiFiError::PositionHealthy);
             }
             let normalized_repay = self.normalize_debt(repay_amount);
-            let max_repay = (pos.debt_amount * self.close_factor) / PRECISION;
+            let max_repay = (pos.debt_amount.saturating_mul(self.close_factor)) / PRECISION;
             if normalized_repay > max_repay {
                 return Err(LiquiFiError::ExceedsCloseFactor);
             }
             let debt_price = self.get_oracle_price(self.debt_token);
             let collateral_price = self.get_oracle_price(self.collateral_token);
             let repay_value_usd =
-                (normalized_repay * debt_price) / (10u128.pow(COLLATERAL_DECIMALS));
+                (normalized_repay.saturating_mul(debt_price)) / (10u128.pow(COLLATERAL_DECIMALS));
             let seize_value_usd =
-                (repay_value_usd * (PRECISION + self.liquidation_incentive)) / PRECISION;
+                (repay_value_usd.saturating_mul(PRECISION.saturating_add(self.liquidation_incentive))) / PRECISION;
             let mut collateral_seized =
-                (seize_value_usd * (10u128.pow(COLLATERAL_DECIMALS))) / collateral_price;
+                (seize_value_usd.saturating_mul(10u128.pow(COLLATERAL_DECIMALS))) / collateral_price;
             if collateral_seized > pos.collateral_amount {
                 collateral_seized = pos.collateral_amount;
             }
-            pos.debt_amount -= normalized_repay;
-            pos.collateral_amount -= collateral_seized;
+            pos.debt_amount = pos.debt_amount.saturating_sub(normalized_repay);
+            pos.collateral_amount = pos.collateral_amount.saturating_sub(collateral_seized);
             self.positions.insert(borrower, &pos);
-            self.total_borrows -= normalized_repay;
-            self.total_deposits -= collateral_seized;
+            self.total_borrows = self.total_borrows.saturating_sub(normalized_repay);
+            self.total_deposits = self.total_deposits.saturating_sub(collateral_seized);
             self.psp22_transfer_from(
                 self.debt_token,
                 caller,
@@ -323,7 +325,7 @@ mod lending_pool {
             if self.total_deposits == 0 {
                 return 0;
             }
-            (self.total_borrows * PRECISION) / self.total_deposits
+            (self.total_borrows.saturating_mul(PRECISION)) / self.total_deposits
         }
         #[ink(message)]
         pub fn get_borrow_rate(&self) -> u128 {
@@ -349,9 +351,9 @@ mod lending_pool {
             if current_usd >= max_borrow_usd {
                 return 0;
             }
-            let remaining = max_borrow_usd - current_usd;
+            let remaining = max_borrow_usd.saturating_sub(current_usd);
             let debt_price = self.get_oracle_price(self.debt_token);
-            (remaining * (10u128.pow(DEBT_DECIMALS))) / debt_price
+            (remaining.saturating_mul(10u128.pow(DEBT_DECIMALS))) / debt_price
         }
         #[ink(message)]
         pub fn get_liquidation_threshold(&self) -> u128 {
@@ -465,8 +467,8 @@ mod lending_pool {
             if self.total_borrows > 0 {
                 let borrow_rate = self.query_borrow_rate();
                 let elapsed_sec = (elapsed / 1000) as u128;
-                let interest_factor = borrow_rate * elapsed_sec;
-                self.borrow_index += (self.borrow_index * interest_factor) / PRECISION;
+                let interest_factor = borrow_rate.saturating_multiply_ratio(elapsed_sec, PRECISION);
+                self.borrow_index = self.borrow_index.saturating_add((self.borrow_index.saturating_mul(interest_factor)) / PRECISION);
             }
             self.last_accrual_timestamp = now;
         }
@@ -481,8 +483,8 @@ mod lending_pool {
                 return;
             }
             let old_debt = pos.debt_amount;
-            pos.debt_amount = (pos.debt_amount * self.borrow_index) / user_idx;
-            self.total_borrows = self.total_borrows + pos.debt_amount - old_debt;
+            pos.debt_amount = (pos.debt_amount.saturating_mul(self.borrow_index)) / user_idx;
+            self.total_borrows = self.total_borrows.saturating_add(pos.debt_amount).saturating_sub(old_debt);
             self.positions.insert(user, &pos);
             self.user_borrow_index.insert(user, &self.borrow_index);
         }
@@ -492,25 +494,25 @@ mod lending_pool {
             }
             let cp = self.get_oracle_price(self.collateral_token);
             let dp = self.get_oracle_price(self.debt_token);
-            let col_usd = (pos.collateral_amount * cp) / (10u128.pow(COLLATERAL_DECIMALS));
-            let adj = (col_usd * self.ltv) / PRECISION;
-            let debt_usd = (pos.debt_amount * dp) / (10u128.pow(COLLATERAL_DECIMALS));
+            let col_usd = (pos.collateral_amount.saturating_mul(cp)) / (10u128.pow(COLLATERAL_DECIMALS));
+            let adj = (col_usd.saturating_mul(self.ltv)) / PRECISION;
+            let debt_usd = (pos.debt_amount.saturating_mul(dp)) / (10u128.pow(COLLATERAL_DECIMALS));
             if debt_usd == 0 {
                 return u128::MAX;
             }
-            (adj * PRECISION) / debt_usd
+            (adj.saturating_mul(PRECISION)) / debt_usd
         }
         fn calculate_max_borrow(&self, collateral: u128) -> u128 {
             let cp = self.get_oracle_price(self.collateral_token);
-            let col_usd = (collateral * cp) / (10u128.pow(COLLATERAL_DECIMALS));
-            (col_usd * self.ltv) / PRECISION
+            let col_usd = (collateral.saturating_mul(cp)) / (10u128.pow(COLLATERAL_DECIMALS));
+            (col_usd.saturating_mul(self.ltv)) / PRECISION
         }
         fn debt_in_usd(&self, debt: u128) -> u128 {
             let dp = self.get_oracle_price(self.debt_token);
-            (debt * dp) / (10u128.pow(COLLATERAL_DECIMALS))
+            (debt.saturating_mul(dp)) / (10u128.pow(COLLATERAL_DECIMALS))
         }
         fn normalize_debt(&self, amount: u128) -> u128 {
-            amount * (10u128.pow(COLLATERAL_DECIMALS - DEBT_DECIMALS))
+            amount.saturating_mul(10u128.pow(COLLATERAL_DECIMALS - DEBT_DECIMALS))
         }
         fn denormalize_debt(&self, amount: u128) -> u128 {
             amount / (10u128.pow(COLLATERAL_DECIMALS - DEBT_DECIMALS))

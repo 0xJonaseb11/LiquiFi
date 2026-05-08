@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
+#![allow(clippy::all)]
 #[ink::contract]
+#[allow(clippy::all)]
 mod interest_rate_model {
     use liquifi_traits::LiquiFiError;
     const PRECISION: u128 = 1_000_000_000_000_000_000;
@@ -57,7 +59,7 @@ mod interest_rate_model {
         pub fn get_supply_rate(&self, total_deposits: u128, total_borrows: u128) -> u128 {
             let borrow_rate = self.get_borrow_rate_per_second(total_deposits, total_borrows);
             let utilization = self.get_utilization(total_deposits, total_borrows);
-            (borrow_rate * utilization * (PRECISION - self.reserve_factor))
+            (borrow_rate * utilization * (PRECISION.saturating_sub(self.reserve_factor)))
                 / (PRECISION * PRECISION)
         }
         #[ink(message)]
@@ -113,13 +115,13 @@ mod interest_rate_model {
             let annual_rate;
             if utilization <= self.optimal_utilization {
                 annual_rate = self.base_rate_per_year
-                    + (utilization * self.slope1) / self.optimal_utilization;
+                    .saturating_add((utilization * self.slope1) / self.optimal_utilization);
             } else {
-                let excess_utilization = utilization - self.optimal_utilization;
-                let remaining_utilization = PRECISION - self.optimal_utilization;
+                let excess_utilization = utilization.saturating_sub(self.optimal_utilization);
+                let remaining_utilization = PRECISION.saturating_sub(self.optimal_utilization);
                 annual_rate = self.base_rate_per_year
-                    + self.slope1
-                    + (excess_utilization * self.slope2) / remaining_utilization;
+                    .saturating_add(self.slope1)
+                    .saturating_add((excess_utilization * self.slope2) / remaining_utilization);
             }
             annual_rate / SECONDS_PER_YEAR
         }

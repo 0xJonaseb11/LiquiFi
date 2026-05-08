@@ -1,6 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
+#![allow(clippy::all)]
 
 #[ink::contract]
+#[allow(clippy::all)]
 mod mock_wdot {
     use ink::prelude::string::String;
     use ink::prelude::vec::Vec;
@@ -44,8 +46,8 @@ mod mock_wdot {
         #[ink(message)]
         pub fn mint(&mut self, to: AccountId, amount: Balance) -> Result<(), ()> {
             let current_balance = self.balances.get(to).unwrap_or(0);
-            self.balances.insert(to, &(current_balance + amount));
-            self.total_supply += amount;
+            self.balances.insert(to, &current_balance.saturating_add(amount));
+            self.total_supply = self.total_supply.saturating_add(amount);
             self.env().emit_event(Transfer {
                 from: None,
                 to: Some(to),
@@ -82,7 +84,7 @@ mod mock_wdot {
             if allowance < value {
                 return Err(());
             }
-            self.allowances.insert((from, caller), &(allowance - value));
+            self.allowances.insert((from, caller), &allowance.saturating_sub(value));
             self.internal_transfer(from, to, value)
         }
 
@@ -123,9 +125,9 @@ mod mock_wdot {
             if from_balance < value {
                 return Err(());
             }
-            self.balances.insert(from, &(from_balance - value));
+            self.balances.insert(from, &from_balance.saturating_sub(value));
             let to_balance = self.balances.get(to).unwrap_or(0);
-            self.balances.insert(to, &(to_balance + value));
+            self.balances.insert(to, &to_balance.saturating_add(value));
             self.env().emit_event(Transfer {
                 from: Some(from),
                 to: Some(to),

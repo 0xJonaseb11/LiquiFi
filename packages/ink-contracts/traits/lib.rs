@@ -1,8 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
+#![allow(clippy::cast_possible_truncation)]
 use ink::prelude::vec::Vec;
 use ink::primitives::AccountId;
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+#[cfg_attr(feature = "std", derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout))]
 pub enum LiquiFiError {
     ZeroAmount,
     Unauthorized,
@@ -32,7 +33,7 @@ pub enum LiquiFiError {
     MaxRetriesExceeded,
 }
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+#[cfg_attr(feature = "std", derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout))]
 pub enum Psp22ErrorKind {
     InsufficientBalance,
     InsufficientAllowance,
@@ -41,7 +42,7 @@ pub enum Psp22ErrorKind {
     Custom(Vec<u8>),
 }
 #[derive(Debug, Default, Clone, PartialEq, Eq, scale::Encode, scale::Decode)]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+#[cfg_attr(feature = "std", derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout))]
 pub struct Position {
     pub collateral_amount: u128,
     pub debt_amount: u128,

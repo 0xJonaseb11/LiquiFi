@@ -2,6 +2,7 @@
 name = "xcm_liquidator"
 version = "0.1.0"
 edition = "2021"
+authors = ["LiquiFi"]
 
 [dependencies]
 ink = { workspace = true }

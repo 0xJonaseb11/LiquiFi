@@ -2,6 +2,9 @@
 name = "mock_wdot"
 version = "0.1.0"
 edition = "2021"
+authors = ["LiquiFi"]
+[profile.release]
+panic = "abort"
 
 [dependencies]
 ink = { workspace = true }
@@ -10,7 +13,7 @@ scale-info = { workspace = true }
 liquifi-traits = { path = "../../traits", default-features = false, features = ["ink-as-dependency"] }
 
 [dev-dependencies]
-ink_e2e = { version = "5.1" }
+ink_e2e = { version = "5.0.0" }
 
 [lib]
 name = "mock_wdot"

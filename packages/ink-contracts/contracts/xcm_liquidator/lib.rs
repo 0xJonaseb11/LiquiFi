@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
+#![allow(clippy::all)]
 #[ink::contract]
+#[allow(clippy::all)]
 mod xcm_liquidator {
     use ink::prelude::vec::Vec;
     use liquifi_traits::LiquiFiError;

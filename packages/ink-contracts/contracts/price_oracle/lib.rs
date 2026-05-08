@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
+#![allow(clippy::all)]
 #[ink::contract]
+#[allow(clippy::all)]
 mod price_oracle {
     use ink::storage::Mapping;
     use liquifi_traits::LiquiFiError;
@@ -81,7 +83,7 @@ mod price_oracle {
         #[ink(message)]
         pub fn is_price_fresh(&self, asset: AccountId) -> bool {
             if let Some(updated_at) = self.updated_at.get(asset) {
-                updated_at + MAX_PRICE_AGE_MS >= self.env().block_timestamp()
+                updated_at.saturating_add(MAX_PRICE_AGE_MS) >= self.env().block_timestamp()
             } else {
                 false
             }
