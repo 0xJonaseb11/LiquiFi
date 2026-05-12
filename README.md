@@ -95,46 +95,6 @@ All contracts are **UUPS upgradeable** with custom errors for gas optimization.
 5. **Health Factor drops**: HF = (10 × 1500 × 0.75) / 14000 ≈ 0.803 → LIQUIDATABLE
 6. **Liquidate**: Bot auto-detects, or use Admin Panel manual liquidation
 
-## Key Design Decisions
+-------------
 
-### Why Custom Errors over require()?
-- Custom errors save ~50-100 gas per revert vs. string error messages
-- Better for production; same debugging info with custom error parameters
-
-### Why UUPS over Transparent Proxy?
-- Smaller proxy contract (cheaper deployment)
-- Upgrade logic lives in implementation (can be removed by deploying non-upgradeable)
-- Recommended by OpenZeppelin for new projects
-
-### Why Single-Pair Pool?
-- Simpler to explain in interviews; same architecture scales to multi-pair via factory
-- Avoids complexity of shared liquidity pools and cross-collateralization
-
-## Project Structure
-
-```
-packages/
-├── hardhat/            # Smart contracts
-│   ├── contracts/      # Solidity source
-│   ├── deploy/         # Hardhat-deploy scripts
-│   └── test/           # Mocha/Chai tests
-├── backend/            # Liquidation bot (TypeScript)
-│   └── src/
-│       ├── index.ts              # Entry point
-│       ├── liquidation-bot.ts    # Core engine
-│       ├── nonce-manager.ts      # TX nonce management
-│       ├── price-feed.ts         # WebSocket price handler
-│       ├── cross-chain-module.ts # Cross-chain workflows
-│       └── transaction-queue.ts  # Priority TX queue
-├── ai-service/         # AI risk scoring (Python/FastAPI)
-│   ├── main.py         # Risk score endpoint
-│   └── sentiment.py    # News sentiment fetcher
-└── nextjs/             # Frontend dashboard
-    └── app/
-        ├── page.tsx              # Landing page
-        └── dashboard/            # Dashboard with components
-```
-
-## License
-
-MIT
+@0xJonaseb111
