@@ -52,7 +52,7 @@
     "@types/node": "~18.19.50",
     "@types/react": "~19.0.7",
     "abitype": "1.0.6",
-    "autoprefixer": "~10.4.20",
+    "autoprefixer": "~10.5.0",
     "bgipfs": "~0.0.12",
     "eslint": "~9.23.0",
     "eslint-config-next": "~15.2.3",
